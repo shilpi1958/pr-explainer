@@ -1,0 +1,57 @@
+name: "PR Learning Log"
+description: "Generates a personalized learning-log entry for a merged PR and commits it."
+author: "shilpi1958"
+branding:
+  icon: "book-open"
+  color: "purple"
+
+inputs:
+  anthropic-api-key:
+    description: "Anthropic API key"
+    required: true
+  profile-path:
+    description: "Path to the learning profile file"
+    required: false
+    default: "learning-profile.md"
+  output-dir:
+    description: "Directory to write learning-log entries into"
+    required: false
+    default: "docs/learning-log"
+  commit:
+    description: "If true, commits and pushes the generated entry directly to the merge commit's branch"
+    required: false
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install pr-learning-log
+      shell: bash
+      run: npm install --no-save pr-learning-log
+
+    - name: Generate learning-log entry
+      id: generate
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        LEARNING_PROFILE: ${{ inputs.profile-path }}
+        LEARNING_LOG_DIR: ${{ inputs.output-dir }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        OUT_PATH=$(npx pr-learning-log "${{ github.event.pull_request.number }}")
+        echo "path=$OUT_PATH" >> "$GITHUB_OUTPUT"
+
+    - name: Commit entry
+      if: ${{ inputs.commit == 'true' }}
+      shell: bash
+      run: |
+        git config user.name "pr-learning-log[bot]"
+        git config user.email "actions@github.com"
+        git add "${{ steps.generate.outputs.path }}"
+        git commit -m "docs: learning-log entry for #${{ github.event.pull_request.number }}"
+        git push

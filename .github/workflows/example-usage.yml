@@ -1,0 +1,21 @@
+# Example: drop this into your own repo as .github/workflows/learning-log.yml
+name: Learning Log
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  learning-log:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+
+      - uses: shilpi1958/pr-learning-log@v1
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

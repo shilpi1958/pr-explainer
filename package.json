@@ -1,0 +1,23 @@
+{
+  "name": "pr-learning-log",
+  "version": "0.1.0",
+  "description": "Turn every merged PR into a learning-log entry, pitched to your own skill level.",
+  "type": "module",
+  "bin": {
+    "pr-learning-log": "./src/cli.js"
+  },
+  "files": [
+    "src",
+    "templates"
+  ],
+  "scripts": {
+    "start": "node src/cli.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
