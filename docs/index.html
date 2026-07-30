@@ -323,7 +323,7 @@
 
 <section class="block" id="how-it-works">
   <h2 class="eyebrow mono">HOW IT WORKS</h2>
-  <p class="section-sub">Four steps, one command.</p>
+  <p class="section-sub">Init once. Then one command per PR.</p>
   <div class="steps">
     <div class="step mono">
       <div class="num">01</div>
@@ -335,11 +335,11 @@
     </div>
     <div class="step mono">
       <div class="num">03</div>
-      <div class="desc">It reads the diff + description via the GitHub CLI, combines it with your profile, and asks Claude to explain it.</div>
+      <div class="desc">It reads the diff + description via the GitHub CLI, combines it with your profile, and shells out to the Claude Code CLI to explain it.</div>
     </div>
     <div class="step mono">
       <div class="num">04</div>
-      <div class="desc">Saved locally, added to a running index of every PR you've explained so far.</div>
+      <div class="desc">Saved under <code>~/.pr-explainer/explainers/</code>, added to a running index of every PR you've explained so far.</div>
     </div>
   </div>
 
@@ -389,7 +389,7 @@
 <section class="block">
   <div class="narrow">
     <h2 class="eyebrow mono" style="margin-bottom:14px">WHY NO API KEY</h2>
-    <p class="body">pr-explainer shells out to the Claude Code CLI already on your machine — if you already use it, this is free to try immediately. No separate API key, no signup, nothing new to pay for.</p>
+    <p class="body">pr-explainer shells out to the Claude Code CLI already on your machine — if you already use it, this is free to try immediately. No separate Anthropic Console API key, no signup for this tool. You do need Claude Code installed and logged in, plus the GitHub CLI (<code>gh</code>).</p>
   </div>
 </section>
 
@@ -409,7 +409,7 @@
 </section>
 
 <footer class="mono">
-  <span class="tagline">MIT licensed · self-hosted · no data leaves your machine</span>
+  <span class="tagline">MIT licensed · self-hosted · uses your local Claude Code + gh auth</span>
   <div class="links">
     <a href="https://github.com/shilpi1958/pr-explainer">GitHub</a>
     <a href="https://www.producthunt.com/">Product Hunt</a>
