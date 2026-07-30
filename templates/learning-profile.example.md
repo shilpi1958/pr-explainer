@@ -2,29 +2,28 @@
   Copy this file to `learning-profile.md` in your repo root and edit it.
   pr-learning-log reads this before writing each entry so explanations
   land at the right altitude for you specifically.
+
+  Describe your job, not your skill inventory — it's easier to answer
+  accurately, and it's enough for the model to infer what you'd need
+  explained vs. what you'd find condescending.
 -->
 
 # Learning Profile
 
-## Level
-intermediate
-<!-- one of: beginner, intermediate, advanced -->
-<!-- or free text, e.g. "strong backend, new to frontend" -->
+## Role
+Backend engineer, 2 years experience, mostly Node.js/Postgres services.
+<!-- Your actual title/role and how long you've done it. Free text. -->
 
-## Known well
-- JavaScript / Node.js
-- REST APIs
-- Git
-
-## Actively learning
-- React hooks and state management
-- CI/CD and GitHub Actions
-- Testing strategy
+## Currently working on / learning toward
+Picking up frontend — this is my first repo with a real UI. Also trying
+to get better at CI/CD; I've only ever used pre-configured pipelines.
+<!-- What you're stretching into right now. This is what explanations
+     should slow down for. -->
 
 ## Tone
 Direct, a little informal. Explain *why* a decision was made, not just
-what changed. Assume I can read a diff but skip the jargon walkthrough
-on things I already know well.
+what changed. Assume I can read a diff but skip over things a working
+engineer in my role would already know.
 
 ## Reference style
 Prefer entries in this shape:
