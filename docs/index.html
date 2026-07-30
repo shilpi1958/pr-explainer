@@ -136,6 +136,66 @@
   .btn-secondary { border: 1px solid var(--border-strong); color: var(--text); }
   .btn-secondary:hover { border-color: var(--text-muted); }
 
+  .ph-badge {
+    margin: 36px auto 0;
+    max-width: 500px;
+    text-align: left;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    border: 1px solid rgb(224, 224, 224);
+    border-radius: 12px;
+    padding: 20px;
+    background: rgb(255, 255, 255);
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 8px;
+  }
+  .ph-badge-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .ph-badge-top img {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .ph-badge-copy { flex: 1 1 0%; min-width: 0; }
+  .ph-badge-copy h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: rgb(26, 26, 26);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ph-badge-copy p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: rgb(102, 102, 102);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .ph-badge a.ph-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: rgb(255, 97, 84);
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
   /* section shared */
   section.block {
     padding: 70px 40px;
@@ -330,6 +390,16 @@
     <a class="btn-primary mono" href="https://github.com/shilpi1958/pr-explainer">View on GitHub</a>
     <a class="btn-secondary mono" href="https://github.com/shilpi1958/pr-explainer#readme">Read the docs</a>
   </div>
+  <div class="ph-badge">
+    <div class="ph-badge-top">
+      <img alt="PR Explainer" src="https://ph-files.imgix.net/94d60c8c-3d77-47a5-80ec-fd5ae8dfc7ea.png?auto=compress,format&amp;codec=mozjpeg&amp;cs=strip&amp;fit=crop&amp;h=80&amp;w=80">
+      <div class="ph-badge-copy">
+        <h3>PR Explainer</h3>
+        <p>Understand any GitHub PR, even if you don't write code</p>
+      </div>
+    </div>
+    <a class="ph-cta" href="https://www.producthunt.com/products/pr-explainer-2?embed=true&amp;utm_source=embed&amp;utm_medium=post_embed" target="_blank" rel="noopener">Check it out on Product Hunt →</a>
+  </div>
 </section>
 
 <section class="block">
@@ -443,7 +513,7 @@
   <span class="tagline">MIT licensed · self-hosted · uses your local Claude Code + gh auth</span>
   <div class="links">
     <a href="https://github.com/shilpi1958/pr-explainer">GitHub</a>
-    <a href="https://www.producthunt.com/">Product Hunt</a>
+    <a href="https://www.producthunt.com/products/pr-explainer-2">Product Hunt</a>
   </div>
 </footer>
 
