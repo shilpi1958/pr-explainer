@@ -12,28 +12,34 @@ input that changes is a one-time profile describing who's reading.
 
 ## How it works
 
-1. You write a `learning-profile.md` once — your role and what you're
-   currently trying to understand better. Not a skills checklist,
-   just a couple of sentences.
+1. Run `pr-explainer init` once — it creates
+   `~/.pr-explainer/learning-profile.md`. Edit it with your role and
+   what you're currently trying to understand better. Not a skills
+   checklist, just a couple of sentences. That one file applies
+   everywhere you run the CLI.
 2. Point the CLI at any merged PR — a number, a URL, whatever `gh pr
    view` accepts. It reads the PR's diff and description, combines it
    with your profile, and asks Claude to write one plain-language
    explainer: what changed, why it was done this way, why it matters
    to you — followed by a couple of recall questions with answers.
-3. The explainer lands in `docs/explainers/`, and gets added to a
-   running `index.md` of every PR you've explained so far.
+3. The explainer lands in `~/.pr-explainer/explainers/`, and gets added
+   to a running `index.md` of every PR you've explained so far.
 
 ## Quick start (CLI)
 
 ```bash
-npm install -g pr-explainer
-cp node_modules/pr-explainer/templates/learning-profile.example.md ./learning-profile.md
-# edit learning-profile.md to describe yourself
+npm install -g @shilpi1958/pr-explainer
+pr-explainer init
+# edit ~/.pr-explainer/learning-profile.md to describe yourself
 
-pr-explainer 42
-pr-explainer https://github.com/some-org/some-repo/pull/42   # works on any repo
+pr-explainer 42                                          # current repo only
+pr-explainer https://github.com/some-org/some-repo/pull/42   # any repo
+pr-explainer some-org/some-repo#42
 ```
 
+> **Note:** a bare number resolves against the GitHub repo of your current
+> directory. To explain a PR elsewhere, pass the full URL or `owner/repo#N`.
+> Only **merged** PRs are supported.
 No API key needed if you already have [Claude Code](https://claude.com/claude-code)
 installed and logged in — `pr-explainer` calls the local `claude` CLI, so it
 rides on whatever auth you already use there (subscription or key). Run `claude`
@@ -82,14 +88,22 @@ jobs:
 No subscription? Pass `anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}`
 instead (Console API key, billed separately).
 
-Every merge gets you a commit with a fresh explainer.
+Every merge gets you a commit with a fresh explainer. Put a
+`learning-profile.md` in the repo root for the Action (or pass
+`profile-path`); explainers are written to `docs/explainers/` by default.
 
 ## Configuration
 
+Profile lookup (first hit wins):
+
+1. `LEARNING_PROFILE` env
+2. `./learning-profile.md` (repo override — useful for the Action)
+3. `~/.pr-explainer/learning-profile.md` (default for local CLI)
+
 | Env var | Default | Purpose |
 |---|---|---|
-| `LEARNING_PROFILE` | `./learning-profile.md` | path to your profile |
-| `EXPLAINER_DIR` | `./docs/explainers` | output directory |
+| `LEARNING_PROFILE` | `~/.pr-explainer/learning-profile.md` | path to your profile |
+| `EXPLAINER_DIR` | `~/.pr-explainer/explainers` | output directory |
 
 See [`templates/learning-profile.example.md`](templates/learning-profile.example.md)
 for the profile format.
@@ -100,6 +114,26 @@ for the profile format.
 Anthropic API directly. If you already use Claude Code, you already have
 auth configured — nothing new to sign up for, no data leaving your
 machine except what `claude` itself sends.
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| `No profile found` | Run `pr-explainer init`, then edit `~/.pr-explainer/learning-profile.md` |
+| `Could not resolve to a PullRequest` / PR not found | A bare number only looks in the **current** repo. Pass a URL or `owner/repo#42` |
+| `PR … is not merged yet` | Only merged PRs are supported — pick one that already shipped |
+| `claude -p failed` / spending cap / usage limit | Wait for the Claude Code reset, raise your cap, or retry later. Confirm `claude` works on its own |
+| Claude Code CLI not found | Install from https://claude.com/claude-code and run `claude` once to log in |
+| `gh` auth / forbidden errors | Run `gh auth login` |
+| GitHub CLI not found | Install from https://cli.github.com/ |
+
+Quick sanity checks:
+
+```bash
+gh auth status
+claude -p --output-format text <<< "Say hi in one word"
+pr-explainer --help
+```
 
 ## License
 

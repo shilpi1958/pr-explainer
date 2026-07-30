@@ -1,6 +1,7 @@
 <!--
-  Copy this file to `learning-profile.md` in your repo root (or wherever
-  you run pr-explainer from) and edit it.
+  Created by `pr-explainer init` at ~/.pr-explainer/learning-profile.md.
+  Edit that file once — it applies everywhere you run the CLI.
+  (A ./learning-profile.md in a repo overrides the global one if present.)
 
   This describes YOU, the reader — not whoever wrote the PR. You don't
   need to have written the code, or even be technical, to use this tool.

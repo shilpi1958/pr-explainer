@@ -47,11 +47,13 @@ interrupt an engineer to translate for you.
 
 ## How it actually works (for an accurate "how it works" section — don't invent steps)
 
-1. The user writes a short `learning-profile.md` once — their role,
-   and what they're currently trying to understand better. Not a
+1. The user runs `pr-explainer init` once — it creates
+   `~/.pr-explainer/learning-profile.md`. They edit it with their
+   role and what they're currently trying to understand better. Not a
    skills checklist, just a couple of sentences. (e.g. "Product
    analyst, don't read code, need to explain shipped changes to
    stakeholders" or "Backend engineer, 2 years, new to frontend.")
+   That one file applies everywhere they run the CLI.
 2. They run one command against any merged PR — a bare number, a full
    GitHub URL, or `owner/repo#123`:
    ```
@@ -69,12 +71,10 @@ interrupt an engineer to translate for you.
 
 ## The key differentiator (must appear prominently — this is the actual hook)
 
-**No API key, no signup, no billing.** Most AI PR-summarizer tools
-require you to bring your own API key and pay per call. pr-explainer
-instead shells out to the Claude Code CLI already on the user's
-machine — so if they already use Claude Code (subscription or key,
-either works), this is free to try immediately. Nothing new to sign up
-for.
+**No API key, no signup, no billing.** pr-explainer shells out to the
+Claude Code CLI already on the user's machine — so if they already use
+Claude Code (subscription or key, either works), this is free to try
+immediately. Nothing new to sign up for, nothing to pay per call.
 
 Secondary differentiators:
 - Works on **any repo**, not just ones you own — point it at a URL
@@ -116,7 +116,7 @@ Avoid generic robot/AI-brain iconography — this product is about
 ## Landing page — sections to include
 
 1. **Hero:** tagline + one-line explanation + the install command
-   (`npm install -g pr-explainer`) + primary CTA linking to GitHub repo.
+   (`npm install -g @shilpi1958/pr-explainer`) + primary CTA linking to GitHub repo.
 2. **The thesis:** short version of "code is the source of truth, this
    removes the translation barrier" — 2-3 sentences, not a manifesto.
 3. **How it works:** the 4 steps above, ideally with a real example
@@ -125,7 +125,7 @@ Avoid generic robot/AI-brain iconography — this product is about
 4. **Who it's for:** the three scenarios above, as short cards/sections.
 5. **Why no API key:** the differentiator, explained briefly.
 6. **Install / quickstart:** copy-pasteable commands, matching the
-   README (`npm install -g pr-explainer`, copy the profile template,
+   README (`npm install -g @shilpi1958/pr-explainer`, `pr-explainer init`,
    run one command).
 7. **Footer:** link to GitHub repo, license (MIT), maybe a link to
    Product Hunt listing once live.

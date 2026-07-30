@@ -77,7 +77,7 @@ Code is the source of truth. Now anyone can read it.
 > and logged in (subscription or key), pr-explainer rides on that —
 > nothing new to sign up for, no separate billing.
 >
-> Free, open source, self-hosted. `npm install -g pr-explainer`.
+> Free, open source, self-hosted. `npm install -g @shilpi1958/pr-explainer`.
 
 **First maker comment (post immediately after launch):**
 
@@ -139,11 +139,12 @@ Code is the source of truth. Now anyone can read it.
 
 **Thread (reply 4 — the differentiator):**
 
-> Most PR-summarizer tools need you to bring an API key and pay
-> per-call. This one shells out to your local `claude` CLI — so if
-> you're already a Claude Code user, it's free to try, right now.
+> No API key, no per-call billing. This shells out to your local
+> `claude` CLI — so if you're already a Claude Code user, it's free
+> to try, right now.
 >
-> `npm install -g pr-explainer`
+> `npm install -g @shilpi1958/pr-explainer`
+> `pr-explainer init`  # then edit ~/.pr-explainer/learning-profile.md
 
 **Thread (reply 5 — CTA + link):**
 
@@ -165,3 +166,20 @@ and early Twitter traffic hitting the PH page while it's fresh helps that.
 - **Hacker News (Show HN):** title format `Show HN: pr-explainer – explain any GitHub PR in plain English, pitched to you`. HN audience is technical-skeptical — lead with the mechanism (shells out to `claude -p`, no separate API key) rather than the "code is source of truth" framing, which can read as overwrought to that crowd. Expect blunt feedback on the quiz feature's usefulness.
 - **r/programming or r/ExperiencedDevs:** only if genuinely participating, not just dropping a link — these subreddits penalize drive-by self-promotion.
 - **dev.to / Hashnode post:** "Code is the only source of truth that doesn't go stale — here's a tool that makes it readable by anyone" — good place for the longer narrative version of the maker comment, links back to PH/GitHub.
+
+---
+
+## Pre-flight checklist (before PH goes live)
+
+Install note: the npm package is `@shilpi1958/pr-explainer` (the bare
+name `pr-explainer` on npm is a different project). CLI command stays
+`pr-explainer`. Profile lives at `~/.pr-explainer/learning-profile.md`
+after `pr-explainer init` — one file, every directory.
+
+- [ ] `@shilpi1958/pr-explainer` is live on npm; `npm install -g` from a clean machine works
+- [ ] `pr-explainer init` creates `~/.pr-explainer/learning-profile.md`; explaining a PR from `$HOME` works with no local profile
+- [ ] GitHub Pages is serving `docs/index.html` with the scoped install + `init` commands
+- [ ] PH gallery ready: install + init, a real generated explainer, quiz section visible
+- [ ] PH + Twitter go live together (12:01am PT) — not Twitter-first
+- [ ] Maker comment + Show HN title ready to paste
+- [ ] Tag / release `v0.2.0` on GitHub so Action consumers have a clear version

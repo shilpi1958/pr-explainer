@@ -1,10 +1,10 @@
 {
-  "name": "pr-explainer",
-  "version": "0.2.0",
+  "name": "@shilpi1958/pr-explainer",
+  "version": "0.2.1",
   "description": "Point it at any merged PR and get a plain explainer of what it did and why, pitched at you.",
   "type": "module",
   "bin": {
-    "pr-explainer": "./src/cli.js"
+    "pr-explainer": "src/cli.js"
   },
   "files": [
     "src",
@@ -13,7 +13,28 @@
   "scripts": {
     "start": "node src/cli.js"
   },
+  "keywords": [
+    "github",
+    "pull-request",
+    "pr",
+    "explainer",
+    "claude",
+    "cli",
+    "documentation"
+  ],
+  "author": "shilpi1958",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shilpi1958/pr-explainer.git"
+  },
+  "homepage": "https://github.com/shilpi1958/pr-explainer#readme",
+  "bugs": {
+    "url": "https://github.com/shilpi1958/pr-explainer/issues"
+  },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=18"
   }
