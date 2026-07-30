@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { getPR, getPRDiff } from "./github.js";
 import { buildPrompt } from "./prompt.js";
 import { runClaude } from "./claude.js";
+import { runInteractiveQuiz } from "./quiz.js";
 
 const MAX_DIFF_CHARS = 60_000;
 const CONFIG_DIR = path.join(os.homedir(), ".pr-explainer");
@@ -24,13 +25,17 @@ const TEMPLATE_PATH = path.join(
 
 function usage() {
   console.error(
-    `Usage: pr-explainer <PR>
+    `Usage: pr-explainer <PR> [--no-quiz]
        pr-explainer init [--force]
 
 Explains a merged pull request in plain language, tailored to your
 learning profile — however technical or non-technical you are, and
 whether or not you wrote the PR yourself. Ends with a couple of quick
 recall questions so it's something you retain, not just read.
+
+In an interactive terminal, those questions are asked in the CLI after
+the explainer is saved (type an answer, then see the suggested one).
+Pass --no-quiz to skip (also skipped in CI / non-TTY).
 
   PR     a PR number ("42"), a PR URL, or "owner/repo#42"
          (a bare number resolves against the repo in your current directory)
@@ -47,10 +52,25 @@ Profile lookup (first hit wins):
   3. ~/.pr-explainer/learning-profile.md (default)
 
 Env:
-  LEARNING_PROFILE   optional path to profile file
-  EXPLAINER_DIR      optional output dir (default: ~/.pr-explainer/explainers)
+  LEARNING_PROFILE      optional path to profile file
+  EXPLAINER_DIR         optional output dir (default: ~/.pr-explainer/explainers)
+  PR_EXPLAINER_NO_QUIZ  set to 1 to skip the interactive quiz
 `
   );
+}
+
+function parseArgs(argv) {
+  const flags = { noQuiz: false, force: false, help: false };
+  const positionals = [];
+  for (const arg of argv) {
+    if (arg === "-h" || arg === "--help") flags.help = true;
+    else if (arg === "--no-quiz") flags.noQuiz = true;
+    else if (arg === "--force") flags.force = true;
+    else if (arg.startsWith("-")) {
+      throw new Error(`Unknown flag: ${arg}\nRun pr-explainer --help for usage.`);
+    } else positionals.push(arg);
+  }
+  return { flags, positionals };
 }
 
 function resolveProfilePath() {
@@ -136,23 +156,24 @@ async function appendToIndex(outDir, { filename, title, pr }) {
 }
 
 async function main() {
-  const arg = process.argv[2];
-  if (!arg || arg === "-h" || arg === "--help") {
+  const { flags, positionals } = parseArgs(process.argv.slice(2));
+  const command = positionals[0];
+
+  if (flags.help || !command) {
     usage();
-    process.exitCode = arg ? 0 : 1;
+    process.exitCode = flags.help ? 0 : 1;
     return;
   }
 
-  if (arg === "init") {
-    const force = process.argv.includes("--force");
-    await initProfile(force);
+  if (command === "init") {
+    await initProfile(flags.force);
     return;
   }
 
   const profile = await loadProfile();
 
-  const pr = await getPR(arg);
-  let diff = await getPRDiff(arg);
+  const pr = await getPR(command);
+  let diff = await getPRDiff(command);
   if (diff.length > MAX_DIFF_CHARS) {
     diff =
       diff.slice(0, MAX_DIFF_CHARS) +
@@ -176,6 +197,8 @@ async function main() {
   await writeFile(outPath, entry + "\n", "utf8");
   await appendToIndex(outDir, { filename, title, pr });
   console.log(outPath);
+
+  await runInteractiveQuiz(entry, flags);
 }
 
 main().catch((err) => {
