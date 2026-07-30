@@ -30,12 +30,12 @@ function usage() {
 
 Explains a merged pull request in plain language, tailored to your
 learning profile — however technical or non-technical you are, and
-whether or not you wrote the PR yourself. Ends with a couple of quick
-recall questions so it's something you retain, not just read.
+whether or not you wrote the PR yourself. Ends with a multiple-choice
+Quick check so it's something you retain, not just read.
 
-In an interactive terminal, those questions are asked in the CLI after
-the explainer is saved (type an answer, then see the suggested one).
-Pass --no-quiz to skip (also skipped in CI / non-TTY).
+In an interactive terminal, after the explainer is saved: CHECK IT STUCK
+quiz (a/b/c or 1/2/3, Enter to skip, q to quit), then optionally open
+the saved file. Pass --no-quiz to skip (also skipped in CI / non-TTY).
 
   PR     a PR number ("42"), a PR URL, or "owner/repo#42"
          (a bare number resolves against the repo in your current directory)
@@ -198,7 +198,7 @@ async function main() {
   await appendToIndex(outDir, { filename, title, pr });
   console.log(outPath);
 
-  await runInteractiveQuiz(entry, flags);
+  await runInteractiveQuiz(entry, flags, outPath);
 }
 
 main().catch((err) => {

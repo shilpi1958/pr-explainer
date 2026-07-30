@@ -21,13 +21,11 @@ input that changes is a one-time profile describing who's reading.
    view` accepts. It reads the PR's diff and description, combines it
    with your profile, and asks Claude to write one plain-language
    explainer: what changed, why it was done this way, why it matters
-   to you — followed by a couple of recall questions with answers.
+   to you — followed by a multiple-choice Quick check.
 3. The explainer lands in `~/.pr-explainer/explainers/`, and gets added
    to a running `index.md` of every PR you've explained so far. In an
-   interactive terminal, the CLI then quizzes you on those questions
-   (type an answer, then see the suggested one). In an
-   interactive terminal, the CLI then quizzes you on those questions —
-   type an answer (or skip), then see the suggested one.
+   interactive terminal, the CLI then runs a CHECK IT STUCK quiz
+   (pick A/B/C, Enter to skip, `q` to quit) and can open the saved file.
 
 ## Quick start (CLI)
 
@@ -46,10 +44,11 @@ pr-explainer https://github.com/some-org/some-repo/pull/42 --no-quiz
 > directory. To explain a PR elsewhere, pass the full URL or `owner/repo#N`.
 > Only **merged** PRs are supported.
 
-After the explainer is saved, an interactive terminal asks the Quick check
-questions one by one — type an answer (or Enter to skip), then see the
-suggested answer. The Markdown file still keeps the questions with
-collapsed answers for later. Pass `--no-quiz` (or set
+After the explainer is saved, an interactive terminal runs a multiple-choice
+Quick check (`a`/`b`/`c` or `1`/`2`/`3`, Enter to skip, `q` to quit early).
+Correct picks get a green ✓; wrong picks show the right option. Then you’re
+offered `Open explainer? [y/N]`. The Markdown file still keeps the questions
+with options and collapsed answers for later. Pass `--no-quiz` (or set
 `PR_EXPLAINER_NO_QUIZ=1`) to skip; the quiz is also skipped when stdin
 isn’t a TTY (CI, pipes).
 

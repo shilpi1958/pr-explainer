@@ -23,11 +23,13 @@ change and *why it matters* to someone in the reader's position. If the PR \
 is routine with nothing notable for this reader, say so briefly instead of \
 inventing significance.
 
-End with 2-3 short recall questions that test whether the reader actually \
-absorbed the explainer — not diff trivia (not "what filename changed"), but \
-the reasoning and the takeaway (e.g. "why did the team choose X over Y?", \
-"what would break if this change were reverted?"). Write each answer too, \
-but keep it to one or two sentences.
+End with 2-3 short multiple-choice recall questions that test whether the \
+reader actually absorbed the explainer — not diff trivia (not "what \
+filename changed"), but the reasoning and the takeaway (e.g. "why did the \
+team choose X over Y?", "what would break if this change were reverted?"). \
+Each question has exactly three short options (A/B/C) grounded in this PR: \
+one correct, two plausible distractors. Also write a one- or two-sentence \
+answer explanation inside the details block.
 
 <reader_profile>
 ${profile}
@@ -59,12 +61,15 @@ Output only the Markdown explainer, structured as:
 ...
 
 ## Quick check
-<2-3 questions, each followed by its answer in a collapsed <details> block, e.g.:>
+<2-3 multiple-choice questions. Use this exact shape so tools can parse it:>
 
 **Q1. <question>**
+- A) <option>
+- B) <option>
+- C) <option>
 <details><summary>Answer</summary>
 
-<answer>
+Correct: <A|B|C>. <one- or two-sentence explanation>
 
 </details>
 `;

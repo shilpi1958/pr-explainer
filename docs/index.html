@@ -216,6 +216,22 @@
   .terminal-body .gap { height: 10px; }
   .terminal-body .gap-sm { height: 6px; }
   .terminal-body .ans { color: var(--orange); }
+  .terminal-body .eyebrow {
+    color: var(--green);
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-align: left;
+    margin: 0;
+    font-size: 12.5px;
+  }
+  .terminal-body .opt { color: var(--text-dim); }
+  .terminal-body .correct {
+    color: var(--green);
+    border-left: 2px solid var(--green);
+    padding-left: 10px;
+    margin: 4px 0;
+  }
+  .terminal-body .footer-note { color: var(--text-faint); font-size: 11.5px; }
 
   /* who it's for */
   .cards {
@@ -341,7 +357,7 @@
     </div>
     <div class="step mono">
       <div class="num">04</div>
-      <div class="desc">Saved under <code>~/.pr-explainer/explainers/</code>, then the CLI quizzes you interactively — type an answer, see the suggested one.</div>
+      <div class="desc">Saved under <code>~/.pr-explainer/explainers/</code>, then a CHECK IT STUCK multiple-choice quiz — pick A/B/C, see ✓ correct.</div>
     </div>
   </div>
 
@@ -352,14 +368,17 @@
       <div class="ok">Generating explainer for PR #32: Add new onInput event</div>
       <div class="out">~/.pr-explainer/explainers/01-react-now-responds-to-text-input-changes-faster-and-more-rel.md</div>
       <div class="gap"></div>
-      <div class="hd">Quick check — 3 questions. Type an answer, then Enter (blank to skip).</div>
+      <div class="eyebrow">CHECK IT STUCK</div>
+      <div class="out">Quick check · a/b/c · Enter skip · q quit</div>
       <div class="gap-sm"></div>
-      <div class="ok">Q1. Why did the team choose onInput over onKeyUp?</div>
-      <div><span class="prompt">Your answer:</span> <span class="out">fires for paste too, not just key release</span></div>
-      <div class="ok">Answer:</div>
-      <div class="out">onInput fires faster and works for typing, paste, voice — onKeyUp is keyboard-only with a delay.</div>
+      <div class="out">3 of 5</div>
+      <div class="hd">Why did the team choose onInput over onKeyUp?</div>
+      <div class="opt">  A) onKeyUp is deprecated in modern browsers</div>
+      <div class="correct">  B) onInput fires for paste/voice too — not just key release  ✓ correct</div>
+      <div class="opt">  C) onInput is required for React 19 concurrent mode</div>
       <div class="gap-sm"></div>
-      <div class="out"># …full explainer also saved with collapsed answers for later</div>
+      <div class="footer-note">3 of 5 · generated from this PR's actual diff…</div>
+      <div class="out">Open explainer? [y/N]</div>
     </div>
   </div>
 </section>
