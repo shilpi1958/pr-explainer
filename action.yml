@@ -39,7 +39,7 @@ runs:
     - name: Install pr-explainer and Claude Code CLI
       shell: bash
       run: |
-        npm install --no-save pr-explainer @anthropic-ai/claude-code
+        npm install --no-save @shilpi1958/pr-explainer @anthropic-ai/claude-code
 
     - name: Generate explainer
       id: generate
