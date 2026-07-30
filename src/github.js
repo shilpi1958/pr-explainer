@@ -14,31 +14,24 @@ async function gh(args) {
   }
 }
 
-export async function getPR(prNumber) {
+// Accepts a bare number ("42"), a PR URL, or "owner/repo#42" — anything
+// `gh pr view` itself understands. A URL/owner-repo form works from any
+// directory; a bare number resolves against the repo in cwd.
+export async function getPR(prRef) {
   const json = await gh([
     "pr",
     "view",
-    String(prNumber),
+    String(prRef),
     "--json",
-    "number,title,body,mergedAt",
+    "number,title,body,mergedAt,url",
   ]);
   const pr = JSON.parse(json);
   if (!pr.mergedAt) {
-    throw new Error(`PR #${prNumber} is not merged yet.`);
+    throw new Error(`PR ${prRef} is not merged yet.`);
   }
   return pr;
 }
 
-export async function getPRDiff(prNumber) {
-  return gh(["pr", "diff", String(prNumber)]);
-}
-
-export async function getCurrentBranchPR() {
-  const json = await gh([
-    "pr",
-    "view",
-    "--json",
-    "number,title,body,mergedAt",
-  ]);
-  return JSON.parse(json);
+export async function getPRDiff(prRef) {
+  return gh(["pr", "diff", String(prRef)]);
 }

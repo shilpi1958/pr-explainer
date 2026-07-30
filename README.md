@@ -1,19 +1,23 @@
 # pr-learning-log
 
-Turn every merged PR into a learning-log entry — pitched at *your*
-skill level, not a generic changelog.
+Point it at any merged pull request. Get back a plain explanation of
+what it did and why it matters — pitched at *you*, whoever you are.
 
-Most PR summarizer bots describe what changed. This describes what it
-taught you, explained the way you'd explain it to yourself: skip the
-parts you already know, slow down on the parts you're still learning.
+You don't need to have written the PR, or even read code. A product
+analyst can point it at an engineer's PR and get a stakeholder-ready
+explanation with zero jargon. An engineer can point it at a teammate's
+PR and get the reasoning, not just the diff. Same tool — the only
+input that changes is a one-time profile describing who's reading.
 
 ## How it works
 
-1. You write a `learning-profile.md` once — your level, what you know
-   well, what you're actively learning, your preferred tone.
-2. On every merged PR, the tool reads the PR's diff and description,
-   combines it with your profile, and asks Claude to write one
-   Markdown entry: the problem, the fix, and the lesson.
+1. You write a `learning-profile.md` once — your role and what you're
+   currently trying to understand better. Not a skills checklist,
+   just a couple of sentences.
+2. Point the CLI at any merged PR — a number, a URL, whatever `gh pr
+   view` accepts. It reads the PR's diff and description, combines it
+   with your profile, and asks Claude to write one plain-language
+   entry: what changed, why it was done this way, why it matters to you.
 3. The entry lands in `docs/learning-log/`.
 
 ## Quick start (CLI)
@@ -23,10 +27,9 @@ npm install -g pr-learning-log
 cp node_modules/pr-learning-log/templates/learning-profile.example.md ./learning-profile.md
 # edit learning-profile.md to describe yourself
 
-pr-learning-log 42   # generates an entry for merged PR #42
+pr-learning-log 42
+pr-learning-log https://github.com/some-org/some-repo/pull/42   # works on any repo
 ```
-
-Omit the PR number to use the PR associated with your current branch.
 
 No API key needed if you already have [Claude Code](https://claude.com/claude-code)
 installed and logged in — `pr-learning-log` calls the local `claude` CLI, so it
@@ -36,7 +39,11 @@ once to log in if you haven't.
 Also requires the [GitHub CLI](https://cli.github.com/) (`gh`), authenticated
 (`gh auth login`).
 
-## GitHub Action
+## GitHub Action (optional)
+
+The CLI is the main way to use this — point it at any PR, any time. The
+Action is for the narrower case of auto-generating an entry for your
+*own* repo's PRs as they merge, committed automatically.
 
 CI runners don't have access to your local `claude` login, so the Action
 needs a credential. If you have a Claude subscription, generate a

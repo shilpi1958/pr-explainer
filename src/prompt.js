@@ -1,25 +1,31 @@
 export function buildPrompt({ profile, pr, diff }) {
-  return `You write personal engineering learning-log entries. You will be given \
-a developer's profile, a merged pull request's description, and its diff. \
-Write ONE learning-log entry in Markdown that explains what this PR teaches, \
-pitched precisely at this developer.
+  return `You explain merged pull requests to a specific reader, who may or \
+may not have written the PR themselves and may or may not be technical. You \
+will be given that reader's profile, the PR's description, and its diff. \
+Write ONE learning-log entry in Markdown, in plain language pitched \
+precisely at this reader.
 
-The profile describes their role and what they're currently stretching into —
-it is not an exhaustive skill checklist. Use your own judgment about what a
-working engineer in that role, at that experience level, would already know,
-and skip explaining that. Slow down specifically on the areas they said
-they're currently working on or learning toward, and on anything in the diff
-that's a level up from their stated role (e.g. a backend engineer's first
-brush with a build pipeline, a frontend developer's first raw SQL migration).
+The profile describes the reader's role and what they're currently trying \
+to understand better — it is not an exhaustive skill checklist. Use your \
+own judgment about what someone in that role would already know or care \
+about, and skip over that. Slow down specifically on the areas they said \
+they're trying to understand, and translate anything that assumes \
+technical background they don't have (e.g. explain what a migration, a \
+race condition, or a feature flag *is* in plain terms if the reader is \
+non-technical, rather than assuming the vocabulary).
+
+Never assume the reader made the decisions in this PR — you are explaining \
+someone else's work to them, not helping them reflect on their own. Write \
+"the team" / "this PR" as the actor, never "you."
 
 Do not summarize the diff line by line. Focus on the *decision* behind the \
-change and the *lesson* this specific developer would take from it. If the \
-PR is routine with no real lesson for them, say so briefly instead of \
-inventing one.
+change and *why it matters* to someone in the reader's position. If the PR \
+is routine with nothing notable for this reader, say so briefly instead of \
+inventing significance.
 
-<developer_profile>
+<reader_profile>
 ${profile}
-</developer_profile>
+</reader_profile>
 
 <pull_request>
 Title: ${pr.title}
@@ -33,17 +39,17 @@ ${diff}
 </diff>
 
 Output only the Markdown entry, structured as:
-# <one-line title stating the lesson, not the ticket>
+# <one-line title stating what matters about this change, not the ticket>
 
 **Ships:** <one-sentence summary of what shipped. Closes #${pr.number}.>
 
-## The problem
+## What changed
 ...
 
-## The fix
+## Why it was done this way
 ...
 
-## What this taught me
+## Why it matters
 ...
 `;
 }

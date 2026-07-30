@@ -1,33 +1,39 @@
 <!--
-  Copy this file to `learning-profile.md` in your repo root and edit it.
-  pr-learning-log reads this before writing each entry so explanations
-  land at the right altitude for you specifically.
+  Copy this file to `learning-profile.md` in your repo root (or wherever
+  you run pr-learning-log from) and edit it.
 
-  Describe your job, not your skill inventory — it's easier to answer
-  accurately, and it's enough for the model to infer what you'd need
-  explained vs. what you'd find condescending.
+  This describes YOU, the reader — not whoever wrote the PR. You don't
+  need to have written the code, or even be technical, to use this tool.
+
+  Describe your role and what you're trying to understand better — it's
+  easier to answer accurately than trying to list what you do/don't know,
+  and it's enough for the model to infer the rest.
 -->
 
 # Learning Profile
 
 ## Role
-Backend engineer, 2 years experience, mostly Node.js/Postgres services.
-<!-- Your actual title/role and how long you've done it. Free text. -->
+Product analyst. Not a developer — I don't read code, but I track what
+ships and need to explain it to stakeholders.
+<!-- Examples of other roles this works for:
+     "Backend engineer, 2 years, mostly Node.js/Postgres services."
+     "Engineering manager, need the gist without reading every diff."
+     "New grad, first job, still learning to read a diff at all." -->
 
-## Currently working on / learning toward
-Picking up frontend — this is my first repo with a real UI. Also trying
-to get better at CI/CD; I've only ever used pre-configured pipelines.
+## Currently trying to understand better
+Why the team makes the technical choices they do — not the syntax, but
+the reasoning: why refactor now, why this approach over another.
 <!-- What you're stretching into right now. This is what explanations
      should slow down for. -->
 
 ## Tone
-Direct, a little informal. Explain *why* a decision was made, not just
-what changed. Assume I can read a diff but skip over things a working
-engineer in my role would already know.
+Plain language, no unexplained jargon. If a term matters, define it in
+one clause rather than assuming I already know it. Tell me why a change
+matters, not just what the diff contains.
 
 ## Reference style
 Prefer entries in this shape:
-1. A punchy one-line title stating the lesson, not the ticket
-2. "The problem" — what looked simple but wasn't
-3. "The fix" — what actually shipped
-4. "What this taught me" — the transferable lesson
+1. A one-line title stating what matters about the change
+2. "What changed" — in plain terms
+3. "Why it was done this way" — the reasoning, not the syntax
+4. "Why it matters" — the takeaway for someone in my position

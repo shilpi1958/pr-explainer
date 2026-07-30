@@ -2,7 +2,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
-import { getPR, getPRDiff, getCurrentBranchPR } from "./github.js";
+import { getPR, getPRDiff } from "./github.js";
 import { buildPrompt } from "./prompt.js";
 import { runClaude } from "./claude.js";
 
@@ -10,15 +10,18 @@ const MAX_DIFF_CHARS = 60_000;
 
 function usage() {
   console.error(
-    `Usage: pr-learning-log [PR_NUMBER]
+    `Usage: pr-learning-log <PR>
 
-Generates a learning-log entry for a merged PR, tailored to your
-learning-profile.md.
+Explains a merged pull request in a learning-log entry, tailored to your
+learning-profile.md — however technical or non-technical you are, and
+whether or not you wrote the PR yourself.
 
-  PR_NUMBER   optional; defaults to the PR for the current branch
+  PR   a PR number ("42"), a PR URL, or "owner/repo#42"
+       (a bare number resolves against the repo in your current directory)
 
 Requires the Claude Code CLI ("claude") installed and logged in
-(subscription or API key — whatever you already use for \`claude\`).
+(subscription or API key — whatever you already use for \`claude\`), and
+the GitHub CLI ("gh") authenticated.
 
 Env:
   LEARNING_PROFILE    optional path to profile file (default: ./learning-profile.md)
@@ -59,15 +62,16 @@ function slugify(title) {
 
 async function main() {
   const arg = process.argv[2];
-  if (arg === "-h" || arg === "--help") {
+  if (!arg || arg === "-h" || arg === "--help") {
     usage();
+    process.exitCode = arg ? 0 : 1;
     return;
   }
 
   const profile = await loadProfile();
 
-  const pr = arg ? await getPR(arg) : await getCurrentBranchPR();
-  let diff = await getPRDiff(pr.number);
+  const pr = await getPR(arg);
+  let diff = await getPRDiff(arg);
   if (diff.length > MAX_DIFF_CHARS) {
     diff =
       diff.slice(0, MAX_DIFF_CHARS) +
