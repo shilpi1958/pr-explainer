@@ -346,20 +346,21 @@
   <div class="terminal">
     <div class="terminal-bar"><span></span><span></span><span></span></div>
     <div class="terminal-body mono">
-      <div><span class="prompt">$</span> pr-explainer https://github.com/acme/billing-service/pull/482</div>
-      <div class="ok">✓ Fetched PR #482 · "Add retry logic to payment webhook handler"</div>
-      <div class="ok">✓ Loaded ~/.pr-explainer/learning-profile.md</div>
-      <div class="ok">✓ Asking Claude to explain...</div>
-      <div class="out">→ saved to ~/.pr-explainer/explainers/01-retry-logic-for-webhook.md</div>
+      <div><span class="prompt">$</span> pr-explainer https://github.com/facebook/react/pull/32</div>
+      <div class="ok">Generating explainer for PR #32: Add new onInput event</div>
+      <div class="out">~/.pr-explainer/explainers/01-react-now-responds-to-text-input-changes-faster-and-more-rel.md</div>
       <div class="gap"></div>
+      <div class="hd"># React now responds to text input changes faster and more reliably</div>
+      <div class="out"><strong>Ships:</strong> A new onInput event that fires as users type or paste — replacing the older onKeyUp approach.</div>
+      <div class="gap-sm"></div>
       <div class="hd">## What changed</div>
-      <div class="out">Webhook calls to the payment processor now retry 3× with backoff instead of failing silently on timeout.</div>
+      <div class="out">React's event system gains an input event that fires whenever a text field's content changes — typing, paste, voice, autocomplete.</div>
       <div class="gap-sm"></div>
-      <div class="hd">## Why it matters to you</div>
-      <div class="out">You've been seeing "missing payment" support tickets that were actually just dropped webhooks — this should cut those out.</div>
+      <div class="hd">## Why it matters</div>
+      <div class="out">Live search, counters, and previews update immediately — and they keep working when users paste instead of typing letter-by-letter.</div>
       <div class="gap-sm"></div>
-      <div class="hd">## Quiz</div>
-      <div class="out">Q: Why retries instead of a longer timeout? <span class="ans">▸ answer</span></div>
+      <div class="hd">## Quick check</div>
+      <div class="out">Q: Why onInput instead of onKeyUp? <span class="ans">▸ answer</span></div>
     </div>
   </div>
 </section>
