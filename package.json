@@ -1,10 +1,10 @@
 {
-  "name": "pr-learning-log",
-  "version": "0.1.0",
-  "description": "Turn every merged PR into a learning-log entry, pitched to your own skill level.",
+  "name": "pr-explainer",
+  "version": "0.2.0",
+  "description": "Point it at any merged PR and get a plain explainer of what it did and why, pitched at you.",
   "type": "module",
   "bin": {
-    "pr-learning-log": "./src/cli.js"
+    "pr-explainer": "./src/cli.js"
   },
   "files": [
     "src",

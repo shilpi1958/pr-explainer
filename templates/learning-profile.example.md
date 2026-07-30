@@ -1,6 +1,6 @@
 <!--
   Copy this file to `learning-profile.md` in your repo root (or wherever
-  you run pr-learning-log from) and edit it.
+  you run pr-explainer from) and edit it.
 
   This describes YOU, the reader — not whoever wrote the PR. You don't
   need to have written the code, or even be technical, to use this tool.
@@ -32,8 +32,9 @@ one clause rather than assuming I already know it. Tell me why a change
 matters, not just what the diff contains.
 
 ## Reference style
-Prefer entries in this shape:
+Prefer explainers in this shape:
 1. A one-line title stating what matters about the change
 2. "What changed" — in plain terms
 3. "Why it was done this way" — the reasoning, not the syntax
 4. "Why it matters" — the takeaway for someone in my position
+5. A couple of quick recall questions at the end, with answers

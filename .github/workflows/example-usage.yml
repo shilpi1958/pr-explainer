@@ -1,12 +1,12 @@
-# Example: drop this into your own repo as .github/workflows/learning-log.yml
-name: Learning Log
+# Example: drop this into your own repo as .github/workflows/explainer.yml
+name: PR Explainer
 
 on:
   pull_request:
     types: [closed]
 
 jobs:
-  learning-log:
+  explainer:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
@@ -16,7 +16,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.base.ref }}
 
-      - uses: shilpi1958/pr-learning-log@v1
+      - uses: shilpi1958/pr-explainer@v1
         with:
           # generate locally with: claude setup-token
           claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

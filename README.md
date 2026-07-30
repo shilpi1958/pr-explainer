@@ -1,7 +1,8 @@
-# pr-learning-log
+# pr-explainer
 
-Point it at any merged pull request. Get back a plain explanation of
-what it did and why it matters — pitched at *you*, whoever you are.
+Point it at any merged pull request, anywhere on GitHub. Get back a
+plain explainer of what it did and why it matters — pitched at *you*,
+whoever you are — plus a couple of quick questions to check it stuck.
 
 You don't need to have written the PR, or even read code. A product
 analyst can point it at an engineer's PR and get a stakeholder-ready
@@ -17,22 +18,24 @@ input that changes is a one-time profile describing who's reading.
 2. Point the CLI at any merged PR — a number, a URL, whatever `gh pr
    view` accepts. It reads the PR's diff and description, combines it
    with your profile, and asks Claude to write one plain-language
-   entry: what changed, why it was done this way, why it matters to you.
-3. The entry lands in `docs/learning-log/`.
+   explainer: what changed, why it was done this way, why it matters
+   to you — followed by a couple of recall questions with answers.
+3. The explainer lands in `docs/explainers/`, and gets added to a
+   running `index.md` of every PR you've explained so far.
 
 ## Quick start (CLI)
 
 ```bash
-npm install -g pr-learning-log
-cp node_modules/pr-learning-log/templates/learning-profile.example.md ./learning-profile.md
+npm install -g pr-explainer
+cp node_modules/pr-explainer/templates/learning-profile.example.md ./learning-profile.md
 # edit learning-profile.md to describe yourself
 
-pr-learning-log 42
-pr-learning-log https://github.com/some-org/some-repo/pull/42   # works on any repo
+pr-explainer 42
+pr-explainer https://github.com/some-org/some-repo/pull/42   # works on any repo
 ```
 
 No API key needed if you already have [Claude Code](https://claude.com/claude-code)
-installed and logged in — `pr-learning-log` calls the local `claude` CLI, so it
+installed and logged in — `pr-explainer` calls the local `claude` CLI, so it
 rides on whatever auth you already use there (subscription or key). Run `claude`
 once to log in if you haven't.
 
@@ -42,7 +45,7 @@ Also requires the [GitHub CLI](https://cli.github.com/) (`gh`), authenticated
 ## GitHub Action (optional)
 
 The CLI is the main way to use this — point it at any PR, any time. The
-Action is for the narrower case of auto-generating an entry for your
+Action is for the narrower case of auto-generating an explainer for your
 *own* repo's PRs as they merge, committed automatically.
 
 CI runners don't have access to your local `claude` login, so the Action
@@ -54,7 +57,7 @@ claude setup-token
 gh secret set CLAUDE_CODE_OAUTH_TOKEN
 ```
 
-Then drop this into `.github/workflows/learning-log.yml`:
+Then drop this into `.github/workflows/explainer.yml`:
 
 ```yaml
 on:
@@ -62,7 +65,7 @@ on:
     types: [closed]
 
 jobs:
-  learning-log:
+  explainer:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
@@ -71,7 +74,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.base.ref }}
-      - uses: shilpi1958/pr-learning-log@v1
+      - uses: shilpi1958/pr-explainer@v1
         with:
           claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 ```
@@ -79,21 +82,21 @@ jobs:
 No subscription? Pass `anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}`
 instead (Console API key, billed separately).
 
-Every merge gets you a commit with a fresh learning-log entry.
+Every merge gets you a commit with a fresh explainer.
 
 ## Configuration
 
 | Env var | Default | Purpose |
 |---|---|---|
 | `LEARNING_PROFILE` | `./learning-profile.md` | path to your profile |
-| `LEARNING_LOG_DIR` | `./docs/learning-log` | output directory |
+| `EXPLAINER_DIR` | `./docs/explainers` | output directory |
 
 See [`templates/learning-profile.example.md`](templates/learning-profile.example.md)
 for the profile format.
 
 ## Why this needs no separate API key (locally)
 
-`pr-learning-log` shells out to the `claude` CLI instead of calling the
+`pr-explainer` shells out to the `claude` CLI instead of calling the
 Anthropic API directly. If you already use Claude Code, you already have
 auth configured — nothing new to sign up for, no data leaving your
 machine except what `claude` itself sends.

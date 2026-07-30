@@ -1,5 +1,5 @@
-name: "PR Learning Log"
-description: "Generates a personalized learning-log entry for a merged PR and commits it."
+name: "PR Explainer"
+description: "Generates a personalized explainer for a merged PR and commits it."
 author: "shilpi1958"
 branding:
   icon: "book-open"
@@ -20,9 +20,9 @@ inputs:
     required: false
     default: "learning-profile.md"
   output-dir:
-    description: "Directory to write learning-log entries into"
+    description: "Directory to write explainers into"
     required: false
-    default: "docs/learning-log"
+    default: "docs/explainers"
   commit:
     description: "If true, commits and pushes the generated entry directly to the merge commit's branch"
     required: false
@@ -36,30 +36,30 @@ runs:
       with:
         node-version: "20"
 
-    - name: Install pr-learning-log and Claude Code CLI
+    - name: Install pr-explainer and Claude Code CLI
       shell: bash
       run: |
-        npm install --no-save pr-learning-log @anthropic-ai/claude-code
+        npm install --no-save pr-explainer @anthropic-ai/claude-code
 
-    - name: Generate learning-log entry
+    - name: Generate explainer
       id: generate
       shell: bash
       env:
         CLAUDE_CODE_OAUTH_TOKEN: ${{ inputs.claude-code-oauth-token }}
         ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
         LEARNING_PROFILE: ${{ inputs.profile-path }}
-        LEARNING_LOG_DIR: ${{ inputs.output-dir }}
+        EXPLAINER_DIR: ${{ inputs.output-dir }}
         GH_TOKEN: ${{ github.token }}
       run: |
-        OUT_PATH=$(npx pr-learning-log "${{ github.event.pull_request.number }}")
+        OUT_PATH=$(npx pr-explainer "${{ github.event.pull_request.number }}")
         echo "path=$OUT_PATH" >> "$GITHUB_OUTPUT"
 
     - name: Commit entry
       if: ${{ inputs.commit == 'true' }}
       shell: bash
       run: |
-        git config user.name "pr-learning-log[bot]"
+        git config user.name "pr-explainer[bot]"
         git config user.email "actions@github.com"
-        git add "${{ steps.generate.outputs.path }}"
-        git commit -m "docs: learning-log entry for #${{ github.event.pull_request.number }}"
+        git add "${{ steps.generate.outputs.path }}" "$(dirname "${{ steps.generate.outputs.path }}")/index.md"
+        git commit -m "docs: explainer for #${{ github.event.pull_request.number }}"
         git push

@@ -1,9 +1,9 @@
 export function buildPrompt({ profile, pr, diff }) {
-  return `You explain merged pull requests to a specific reader, who may or \
-may not have written the PR themselves and may or may not be technical. You \
-will be given that reader's profile, the PR's description, and its diff. \
-Write ONE learning-log entry in Markdown, in plain language pitched \
-precisely at this reader.
+  return `You write explainers of merged pull requests for a specific \
+reader, who may or may not have written the PR themselves and may or may \
+not be technical. You will be given that reader's profile, the PR's \
+description, and its diff. Write ONE explainer in Markdown, in plain \
+language pitched precisely at this reader.
 
 The profile describes the reader's role and what they're currently trying \
 to understand better — it is not an exhaustive skill checklist. Use your \
@@ -23,6 +23,12 @@ change and *why it matters* to someone in the reader's position. If the PR \
 is routine with nothing notable for this reader, say so briefly instead of \
 inventing significance.
 
+End with 2-3 short recall questions that test whether the reader actually \
+absorbed the explainer — not diff trivia (not "what filename changed"), but \
+the reasoning and the takeaway (e.g. "why did the team choose X over Y?", \
+"what would break if this change were reverted?"). Write each answer too, \
+but keep it to one or two sentences.
+
 <reader_profile>
 ${profile}
 </reader_profile>
@@ -38,7 +44,7 @@ ${pr.body || "(no description provided)"}
 ${diff}
 </diff>
 
-Output only the Markdown entry, structured as:
+Output only the Markdown explainer, structured as:
 # <one-line title stating what matters about this change, not the ticket>
 
 **Ships:** <one-sentence summary of what shipped. Closes #${pr.number}.>
@@ -51,5 +57,15 @@ Output only the Markdown entry, structured as:
 
 ## Why it matters
 ...
+
+## Quick check
+<2-3 questions, each followed by its answer in a collapsed <details> block, e.g.:>
+
+**Q1. <question>**
+<details><summary>Answer</summary>
+
+<answer>
+
+</details>
 `;
 }
