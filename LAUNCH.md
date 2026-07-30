@@ -176,10 +176,10 @@ name `pr-explainer` on npm is a different project). CLI command stays
 `pr-explainer`. Profile lives at `~/.pr-explainer/learning-profile.md`
 after `pr-explainer init` — one file, every directory.
 
-- [ ] `@shilpi1958/pr-explainer` is live on npm; `npm install -g` from a clean machine works
-- [ ] `pr-explainer init` creates `~/.pr-explainer/learning-profile.md`; explaining a PR from `$HOME` works with no local profile
-- [ ] GitHub Pages is serving `docs/index.html` with the scoped install + `init` commands
+- [x] `@shilpi1958/pr-explainer` is live on npm; `npm install -g` from a clean machine works
+- [x] `pr-explainer init` creates `~/.pr-explainer/learning-profile.md`; explaining a PR from `$HOME` works with no local profile
+- [x] GitHub Pages is serving `docs/index.html` with the scoped install + `init` commands
 - [ ] PH gallery ready: install + init, a real generated explainer, quiz section visible
 - [ ] PH + Twitter go live together (12:01am PT) — not Twitter-first
-- [ ] Maker comment + Show HN title ready to paste
-- [ ] Tag / release `v0.2.0` on GitHub so Action consumers have a clear version
+- [x] Maker comment + Show HN title ready to paste (see sections above)
+- [x] Tag / release `v0.2.1` (+ moving `v1`) on GitHub so Action consumers have a clear version
