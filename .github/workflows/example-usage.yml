@@ -18,4 +18,5 @@ jobs:
 
       - uses: shilpi1958/pr-learning-log@v1
         with:
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # generate locally with: claude setup-token
+          claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

@@ -6,9 +6,15 @@ branding:
   color: "purple"
 
 inputs:
+  claude-code-oauth-token:
+    description: >
+      Long-lived token from a Claude subscription, created locally with
+      `claude setup-token` and stored as a repo secret. Preferred — no
+      separate API billing. Provide this or anthropic-api-key.
+    required: false
   anthropic-api-key:
-    description: "Anthropic API key"
-    required: true
+    description: "Anthropic Console API key. Used only if claude-code-oauth-token is not set."
+    required: false
   profile-path:
     description: "Path to the learning profile file"
     required: false
@@ -30,14 +36,16 @@ runs:
       with:
         node-version: "20"
 
-    - name: Install pr-learning-log
+    - name: Install pr-learning-log and Claude Code CLI
       shell: bash
-      run: npm install --no-save pr-learning-log
+      run: |
+        npm install --no-save pr-learning-log @anthropic-ai/claude-code
 
     - name: Generate learning-log entry
       id: generate
       shell: bash
       env:
+        CLAUDE_CODE_OAUTH_TOKEN: ${{ inputs.claude-code-oauth-token }}
         ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
         LEARNING_PROFILE: ${{ inputs.profile-path }}
         LEARNING_LOG_DIR: ${{ inputs.output-dir }}

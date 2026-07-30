@@ -2,9 +2,9 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
-import Anthropic from "@anthropic-ai/sdk";
 import { getPR, getPRDiff, getCurrentBranchPR } from "./github.js";
 import { buildPrompt } from "./prompt.js";
+import { runClaude } from "./claude.js";
 
 const MAX_DIFF_CHARS = 60_000;
 
@@ -17,8 +17,10 @@ learning-profile.md.
 
   PR_NUMBER   optional; defaults to the PR for the current branch
 
+Requires the Claude Code CLI ("claude") installed and logged in
+(subscription or API key — whatever you already use for \`claude\`).
+
 Env:
-  ANTHROPIC_API_KEY   required
   LEARNING_PROFILE    optional path to profile file (default: ./learning-profile.md)
   LEARNING_LOG_DIR    optional output dir (default: ./docs/learning-log)
 `
@@ -62,13 +64,6 @@ async function main() {
     return;
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("Error: ANTHROPIC_API_KEY is not set.");
-    usage();
-    process.exitCode = 1;
-    return;
-  }
-
   const profile = await loadProfile();
 
   const pr = arg ? await getPR(arg) : await getCurrentBranchPR();
@@ -81,19 +76,8 @@ async function main() {
 
   console.error(`Generating learning-log entry for PR #${pr.number}: ${pr.title}`);
 
-  const client = new Anthropic();
   const prompt = buildPrompt({ profile, pr, diff });
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-5",
-    max_tokens: 1500,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const entry = response.content
-    .filter((b) => b.type === "text")
-    .map((b) => b.text)
-    .join("\n")
-    .trim();
+  const entry = await runClaude(prompt);
 
   const titleMatch = entry.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1] : pr.title;

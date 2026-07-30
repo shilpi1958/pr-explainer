@@ -14,9 +14,6 @@
     "start": "node src/cli.js"
   },
   "license": "MIT",
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.0"
-  },
   "engines": {
     "node": ">=18"
   }
