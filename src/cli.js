@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { getPR, getPRDiff } from "./github.js";
 import { buildPrompt } from "./prompt.js";
 import { runClaude } from "./claude.js";
+import { printExplainerSummary } from "./display.js";
 import { runInteractiveQuiz } from "./quiz.js";
 
 const MAX_DIFF_CHARS = 60_000;
@@ -33,9 +34,12 @@ learning profile — however technical or non-technical you are, and
 whether or not you wrote the PR yourself. Ends with a multiple-choice
 Quick check so it's something you retain, not just read.
 
-In an interactive terminal, after the explainer is saved: CHECK IT STUCK
-quiz (a/b/c or 1/2/3, Enter to skip, q to quit), then optionally open
-the saved file. Pass --no-quiz to skip (also skipped in CI / non-TTY).
+After the explainer is saved, a readable summary (title, Ships, What
+changed, Why it was done this way, Why it matters) prints to stderr.
+In an interactive terminal: Press Enter, then CHECK IT STUCK quiz
+(a/b/c or 1/2/3, Enter to skip, q to quit), then optionally open the
+saved file. Pass --no-quiz to skip the quiz (also skipped in CI /
+non-TTY). Summary still prints unless PR_EXPLAINER_QUIET=1.
 
   PR     a PR number ("42"), a PR URL, or "owner/repo#42"
          (a bare number resolves against the repo in your current directory)
@@ -55,6 +59,7 @@ Env:
   LEARNING_PROFILE      optional path to profile file
   EXPLAINER_DIR         optional output dir (default: ~/.pr-explainer/explainers)
   PR_EXPLAINER_NO_QUIZ  set to 1 to skip the interactive quiz
+  PR_EXPLAINER_QUIET    set to 1 to skip printing the summary to stderr
 `
   );
 }
@@ -198,6 +203,7 @@ async function main() {
   await appendToIndex(outDir, { filename, title, pr });
   console.log(outPath);
 
+  printExplainerSummary(entry);
   await runInteractiveQuiz(entry, flags, outPath);
 }
 

@@ -357,7 +357,7 @@
     </div>
     <div class="step mono">
       <div class="num">04</div>
-      <div class="desc">Saved under <code>~/.pr-explainer/explainers/</code>, then a CHECK IT STUCK multiple-choice quiz — pick A/B/C, see ✓ correct.</div>
+      <div class="desc">Saved under <code>~/.pr-explainer/explainers/</code>, summary prints in the terminal, then a CHECK IT STUCK quiz — pick A/B/C, see ✓ correct.</div>
     </div>
   </div>
 
@@ -368,16 +368,28 @@
       <div class="ok">Generating explainer for PR #32: Add new onInput event</div>
       <div class="out">~/.pr-explainer/explainers/01-react-now-responds-to-text-input-changes-faster-and-more-rel.md</div>
       <div class="gap"></div>
+      <div class="hd">React now responds to input changes faster and more reliably</div>
+      <div class="out">Ships: The framework now supports the onInput event…</div>
+      <div class="gap-sm"></div>
+      <div class="eyebrow">What changed</div>
+      <div class="out">The team added onInput; examples switched from onKeyUp.</div>
+      <div class="eyebrow">Why it was done this way</div>
+      <div class="out">Faster updates + paste/voice coverage onKeyUp misses.</div>
+      <div class="eyebrow">Why it matters</div>
+      <div class="out">Live previews feel snappier; fewer paste-miss bugs.</div>
+      <div class="gap-sm"></div>
+      <div class="out">Press Enter for CHECK IT STUCK…</div>
+      <div class="gap"></div>
       <div class="eyebrow">CHECK IT STUCK</div>
       <div class="out">Quick check · a/b/c · Enter skip · q quit</div>
       <div class="gap-sm"></div>
-      <div class="out">3 of 5</div>
+      <div class="out">1 of 3</div>
       <div class="hd">Why did the team choose onInput over onKeyUp?</div>
       <div class="opt">  A) onKeyUp is deprecated in modern browsers</div>
       <div class="correct">  B) onInput fires for paste/voice too — not just key release  ✓ correct</div>
       <div class="opt">  C) onInput is required for React 19 concurrent mode</div>
       <div class="gap-sm"></div>
-      <div class="footer-note">3 of 5 · generated from this PR's actual diff…</div>
+      <div class="footer-note">3 of 3 · generated from this PR's actual diff…</div>
       <div class="out">Open explainer? [y/N]</div>
     </div>
   </div>
@@ -421,7 +433,7 @@
     <div>$ pr-explainer init</div>
     <div>$ # edit ~/.pr-explainer/learning-profile.md</div>
     <div class="gap"></div>
-    <div><span class="comment"># explain a PR (interactive quiz after save)</span></div>
+    <div><span class="comment"># explain a PR (summary, then interactive quiz)</span></div>
     <div>$ pr-explainer owner/repo#123</div>
     <div>$ pr-explainer owner/repo#123 --no-quiz</div>
   </div>

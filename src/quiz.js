@@ -155,18 +155,20 @@ export async function runInteractiveQuiz(markdown, flags = {}, outPath) {
   const rl = readline.createInterface({ input, output: stderr });
   const n = items.length;
 
-  stderr.write("\n");
-  stderr.write(cyan(bold("CHECK IT STUCK")) + "\n");
-  stderr.write(
-    dim(
-      `Quick check · ${n} question${n === 1 ? "" : "s"} · ` +
-        `a/b/c or 1/2/3 · Enter skip · q quit\n`
-    )
-  );
-
   let quitEarly = false;
 
   try {
+    await rl.question(dim("Press Enter for CHECK IT STUCK… "));
+
+    stderr.write("\n");
+    stderr.write(cyan(bold("CHECK IT STUCK")) + "\n");
+    stderr.write(
+      dim(
+        `Quick check · ${n} question${n === 1 ? "" : "s"} · ` +
+          `a/b/c or 1/2/3 · Enter skip · q quit\n`
+      )
+    );
+
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       const progress = dim(`${i + 1} of ${n}`);

@@ -23,9 +23,11 @@ input that changes is a one-time profile describing who's reading.
    explainer: what changed, why it was done this way, why it matters
    to you — followed by a multiple-choice Quick check.
 3. The explainer lands in `~/.pr-explainer/explainers/`, and gets added
-   to a running `index.md` of every PR you've explained so far. In an
-   interactive terminal, the CLI then runs a CHECK IT STUCK quiz
-   (pick A/B/C, Enter to skip, `q` to quit) and can open the saved file.
+   to a running `index.md` of every PR you've explained so far. A readable
+   summary (title, Ships, What changed, Why it was done this way, Why it
+   matters) prints to the terminal first. In an interactive terminal, press
+   Enter for a CHECK IT STUCK quiz (pick A/B/C, Enter to skip, `q` to quit),
+   then optionally open the saved file.
 
 ## Quick start (CLI)
 
@@ -44,13 +46,18 @@ pr-explainer https://github.com/some-org/some-repo/pull/42 --no-quiz
 > directory. To explain a PR elsewhere, pass the full URL or `owner/repo#N`.
 > Only **merged** PRs are supported.
 
-After the explainer is saved, an interactive terminal runs a multiple-choice
-Quick check (`a`/`b`/`c` or `1`/`2`/`3`, Enter to skip, `q` to quit early).
-Correct picks get a green ✓; wrong picks show the right option. Then you’re
-offered `Open explainer? [y/N]`. The Markdown file still keeps the questions
-with options and collapsed answers for later. Pass `--no-quiz` (or set
-`PR_EXPLAINER_NO_QUIZ=1`) to skip; the quiz is also skipped when stdin
-isn’t a TTY (CI, pipes).
+After the explainer is saved, a summary of the key sections prints to stderr
+(title, Ships, What changed, Why it was done this way, Why it matters — Quick
+check is left for the quiz). In an interactive terminal you’re prompted
+`Press Enter for CHECK IT STUCK…`, then the multiple-choice quiz runs
+(`a`/`b`/`c` or `1`/`2`/`3`, Enter to skip, `q` to quit early). Correct picks
+get a green ✓; wrong picks show the right option. Then you’re offered
+`Open explainer? [y/N]`. The Markdown file still keeps the questions with
+options and collapsed answers for later. Pass `--no-quiz` (or set
+`PR_EXPLAINER_NO_QUIZ=1`) to skip the quiz; it’s also skipped when stdin
+isn’t a TTY (CI, pipes). The summary still prints unless
+`PR_EXPLAINER_QUIET=1`. The only stdout line is the saved file path (for
+scripting).
 
 No API key needed if you already have [Claude Code](https://claude.com/claude-code)
 installed and logged in — `pr-explainer` calls the local `claude` CLI, so it
@@ -117,6 +124,7 @@ Profile lookup (first hit wins):
 | `LEARNING_PROFILE` | `~/.pr-explainer/learning-profile.md` | path to your profile |
 | `EXPLAINER_DIR` | `~/.pr-explainer/explainers` | output directory |
 | `PR_EXPLAINER_NO_QUIZ` | unset | set to `1` to skip the interactive quiz |
+| `PR_EXPLAINER_QUIET` | unset | set to `1` to skip printing the summary to stderr |
 
 See [`templates/learning-profile.example.md`](templates/learning-profile.example.md)
 for the profile format.
