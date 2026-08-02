@@ -79,7 +79,7 @@ Auto-generate a PR explainer on merge. Pass Claude credentials and optional
 PostHog secrets:
 
 ```yaml
-- uses: shilpi1958/pr-explainer@v1
+- uses: shilpi1958/code-explainer@v1
   with:
     claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     posthog-api-key: ${{ secrets.POSTHOG_API_KEY }}

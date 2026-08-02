@@ -30,11 +30,11 @@
   "author": "shilpi1958",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shilpi1958/pr-explainer.git"
+    "url": "git+https://github.com/shilpi1958/code-explainer.git"
   },
-  "homepage": "https://github.com/shilpi1958/pr-explainer#readme",
+  "homepage": "https://shilpi1958.github.io/code-explainer/",
   "bugs": {
-    "url": "https://github.com/shilpi1958/pr-explainer/issues"
+    "url": "https://github.com/shilpi1958/code-explainer/issues"
   },
   "license": "MIT",
   "publishConfig": {
