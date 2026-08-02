@@ -3,15 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>code-explainer — plain-English explainers for PRs and repos</title>
-<meta name="description" content="Explain any merged GitHub PR — or a whole repository — in plain English, calibrated to whoever's reading. No separate API key. Free and open source.">
+<title>code-explainer — PRs and repos, explained in plain English</title>
+<meta name="description" content="code-explainer turns merged GitHub PRs — or a whole local repo — into plain-language briefs pitched at your role. Uses Claude Code + gh. Free and open source.">
 
 <meta property="og:title" content="code-explainer">
-<meta property="og:description" content="Explain merged PRs or whole repos in plain English, calibrated to whoever's reading.">
+<meta property="og:description" content="PRs and repos, explained in plain English — pitched at whoever's reading.">
 <meta property="og:image" content="https://shilpi1958.github.io/pr-explainer/social-preview.png">
 <meta property="og:url" content="https://shilpi1958.github.io/pr-explainer/">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="code-explainer">
+<meta name="twitter:description" content="PRs and repos, explained in plain English — pitched at whoever's reading.">
 <meta name="twitter:image" content="https://shilpi1958.github.io/pr-explainer/social-preview.png">
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -51,12 +53,8 @@
   .mono { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace; }
 
   a { color: inherit; }
-
   img, svg { max-width: 100%; }
 
-  .wrap { max-width: 1200px; margin: 0 auto; }
-
-  /* nav */
   nav {
     display: flex;
     align-items: center;
@@ -76,43 +74,40 @@
     color: var(--text);
   }
 
-  /* hero */
   .hero {
-    padding: 100px 40px 90px;
+    padding: 72px 40px 0;
     text-align: center;
     border-bottom: 1px solid var(--border);
-    background: radial-gradient(ellipse at 50% -10%, rgba(126,231,135,0.08), transparent 60%);
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(126,231,135,0.09), transparent 55%),
+      var(--bg);
   }
-  .badge {
-    display: inline-block;
-    font-size: 11px;
-    color: var(--green);
-    border: 1px solid var(--green-border);
-    background: var(--green-bg);
-    padding: 5px 12px;
-    border-radius: 20px;
-    margin-bottom: 24px;
-    letter-spacing: .03em;
+  .hero-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 20px;
+    animation: rise 0.7s ease both;
   }
-  .hero h1 {
-    font-size: 44px;
+  .hero-brand svg { flex-shrink: 0; }
+  .hero-brand h1 {
+    font-size: clamp(36px, 6vw, 56px);
     font-weight: 700;
-    line-height: 1.15;
-    margin: 0 0 18px;
-    max-width: 820px;
-    margin-left: auto;
-    margin-right: auto;
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -0.02em;
   }
   .hero p.sub {
     font-size: 17px;
     color: var(--text-muted);
-    max-width: 600px;
-    margin: 0 auto 36px;
-    line-height: 1.6;
+    max-width: 520px;
+    margin: 0 auto 28px;
+    line-height: 1.55;
+    animation: rise 0.7s ease 0.08s both;
   }
   .install-line {
     max-width: 520px;
-    margin: 0 auto 28px;
+    margin: 0 auto 22px;
     background: var(--bg-panel);
     border: 1px solid var(--border-strong);
     border-radius: 8px;
@@ -120,9 +115,17 @@
     text-align: left;
     font-size: 14px;
     color: var(--text-dim);
+    animation: rise 0.7s ease 0.14s both;
   }
   .install-line .prompt { color: var(--text-faint); }
-  .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .cta-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+    animation: rise 0.7s ease 0.2s both;
+  }
   .btn-primary, .btn-secondary {
     font-weight: 600;
     font-size: 14px;
@@ -136,7 +139,24 @@
   .btn-secondary { border: 1px solid var(--border-strong); color: var(--text); }
   .btn-secondary:hover { border-color: var(--text-muted); }
 
-  /* section shared */
+  .hero-visual {
+    max-width: 920px;
+    margin: 0 auto;
+    text-align: left;
+    animation: rise 0.85s ease 0.28s both;
+  }
+  .hero-visual .terminal {
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.35);
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   section.block {
     padding: 70px 40px;
     border-bottom: 1px solid var(--border);
@@ -156,149 +176,168 @@
     font-size: 15px;
   }
 
-  /* thesis */
   .thesis {
     max-width: 760px;
     margin: 0 auto;
     text-align: center;
   }
-  .thesis p.body {
+  .thesis .body {
     font-size: 20px;
-    line-height: 1.6;
+    line-height: 1.55;
     color: var(--text-dim);
-    margin: 0;
+    margin: 16px 0 0;
   }
 
-  /* how it works */
+  .modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .mode {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 26px;
+  }
+  .mode .cmd {
+    font-size: 14px;
+    color: var(--green);
+    margin: 0 0 12px;
+  }
+  .mode h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+  }
+  .mode p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .mode .note {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+
   .steps {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    max-width: 1000px;
+    gap: 20px;
+    max-width: 1100px;
     margin: 0 auto 48px;
   }
   .step {
+    background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 18px;
+    border-radius: 10px;
+    padding: 22px 18px;
   }
-  .step .num { color: var(--green); font-size: 20px; font-weight: 700; margin-bottom: 10px; }
-  .step .desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
-  .step .desc code { color: var(--text); }
+  .step .num { color: var(--green); font-size: 12px; margin-bottom: 12px; }
+  .step .desc { font-size: 13px; color: var(--text-dim); line-height: 1.55; }
+  .step code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--green-dim);
+  }
 
   .terminal {
-    max-width: 720px;
+    max-width: 820px;
     margin: 0 auto;
     background: var(--bg-panel);
     border: 1px solid var(--border-strong);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
   }
   .terminal-bar {
     display: flex;
-    gap: 6px;
-    padding: 10px 14px;
+    gap: 7px;
+    padding: 12px 14px;
     border-bottom: 1px solid var(--border);
+    background: #010409;
   }
   .terminal-bar span {
     width: 10px; height: 10px; border-radius: 50%;
-    background: var(--border-strong); display: inline-block;
+    background: var(--border-strong);
   }
   .terminal-body {
-    padding: 18px 20px;
-    font-size: 12.5px;
-    line-height: 1.8;
+    padding: 22px 24px 26px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-dim);
   }
   .terminal-body .prompt { color: var(--text-faint); }
   .terminal-body .ok { color: var(--green); }
   .terminal-body .out { color: var(--text-muted); }
-  .terminal-body .hd { color: var(--text); }
-  .terminal-body .gap { height: 10px; }
-  .terminal-body .gap-sm { height: 6px; }
-  .terminal-body .ans { color: var(--orange); }
-  .terminal-body .eyebrow {
-    color: var(--green);
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-align: left;
-    margin: 0;
-    font-size: 12.5px;
-  }
-  .terminal-body .opt { color: var(--text-dim); }
-  .terminal-body .correct {
-    color: var(--green);
-    border-left: 2px solid var(--green);
-    padding-left: 10px;
-    margin: 4px 0;
-  }
-  .terminal-body .footer-note { color: var(--text-faint); font-size: 11.5px; }
+  .terminal-body .hd { color: var(--text); font-weight: 600; }
+  .terminal-body .eyebrow { text-align: left; margin: 10px 0 2px; font-size: 11px; }
+  .terminal-body .gap { height: 14px; }
+  .terminal-body .gap-sm { height: 8px; }
+  .terminal-body .opt { color: var(--text-muted); }
+  .terminal-body .correct { color: var(--green); }
+  .terminal-body .footer-note { color: var(--text-faint); font-size: 12px; }
+  .terminal-body .dim { color: var(--text-faint); }
 
-  /* who it's for */
   .cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    max-width: 1000px;
+    gap: 18px;
+    max-width: 1100px;
     margin: 0 auto;
   }
   .card {
+    background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 24px;
+    border-radius: 10px;
+    padding: 26px 22px;
   }
-  .card .tag { font-size: 12px; color: var(--green); margin-bottom: 10px; }
-  .card h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
-  .card p { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin: 0; }
+  .card .tag { font-size: 11px; color: var(--green); margin-bottom: 12px; }
+  .card h3 { margin: 0 0 10px; font-size: 17px; }
+  .card p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.55; }
 
-  /* why no key */
-  .narrow {
-    max-width: 700px;
-    margin: 0 auto;
-    text-align: center;
-  }
-  .narrow p.body {
+  .narrow { max-width: 720px; margin: 0 auto; text-align: center; }
+  .narrow .body {
     font-size: 16px;
+    line-height: 1.65;
     color: var(--text-dim);
-    line-height: 1.6;
     margin: 0;
   }
 
-  /* install */
   .install-block {
-    max-width: 560px;
+    max-width: 640px;
     margin: 0 auto;
     background: var(--bg-panel);
     border: 1px solid var(--border-strong);
-    border-radius: 8px;
-    padding: 20px 24px;
-    font-size: 13.5px;
-    line-height: 2;
+    border-radius: 10px;
+    padding: 28px 30px;
+    font-size: 13px;
+    line-height: 1.8;
     color: var(--text-dim);
   }
   .install-block .comment { color: var(--text-faint); }
-  .install-block .gap { height: 8px; }
+  .install-block .gap { height: 14px; }
 
   footer {
-    padding: 32px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     flex-wrap: wrap;
-    gap: 12px;
+    padding: 28px 40px;
+    color: var(--text-faint);
+    font-size: 12px;
   }
-  footer .tagline { font-size: 12px; color: var(--text-faint); }
   footer .links { display: flex; gap: 20px; }
-  footer .links a { font-size: 12px; color: var(--text-muted); text-decoration: none; }
-  footer .links a:hover { color: var(--text); }
+  footer a { color: var(--text-muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
 
-  @media (max-width: 860px) {
-    .steps { grid-template-columns: repeat(2, 1fr); }
-    .cards { grid-template-columns: 1fr; }
-    .nav-links { gap: 16px; }
-    .hero h1 { font-size: 32px; }
-    section.block { padding: 50px 20px; }
+  @media (max-width: 900px) {
+    .steps, .cards, .modes { grid-template-columns: 1fr; }
+    .hero { padding: 56px 20px 0; }
     nav { padding: 16px 20px; }
-    .hero { padding: 60px 20px 60px; }
+    section.block { padding: 56px 20px; }
   }
 </style>
 </head>
@@ -315,82 +354,95 @@
     <span class="mono">code-explainer</span>
   </div>
   <div class="nav-links mono">
-    <a href="#how-it-works">How it works</a>
+    <a href="#modes">Modes</a>
     <a href="#install">Install</a>
     <a class="btn" href="https://github.com/shilpi1958/pr-explainer">GitHub ↗</a>
   </div>
 </nav>
 
 <section class="hero">
-  <div class="badge mono">NO SEPARATE API KEY · CLAUDE CODE + GH · FREE &amp; OPEN SOURCE</div>
-  <h1 class="mono">Explain a PR or a whole repo<br>in plain English.</h1>
-  <p class="sub">Calibrated to whoever's reading — technical or not — plus an interactive CLI quiz to check it stuck.</p>
+  <div class="hero-brand mono">
+    <svg width="48" height="48" viewBox="0 0 72 72" aria-hidden="true">
+      <path d="M24 16 L12 36 L24 56" stroke="#e6edf3" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M34 36 H60" stroke="#7ee787" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M34 24 H50" stroke="#7ee787" stroke-width="4.5" stroke-linecap="round" opacity="0.55"/>
+      <path d="M34 48 H54" stroke="#7ee787" stroke-width="4.5" stroke-linecap="round" opacity="0.55"/>
+    </svg>
+    <h1>code-explainer</h1>
+  </div>
+  <p class="sub">Code is the source of truth that doesn’t go stale. This CLI translates it — a merged PR or a whole repo — into a brief pitched at whoever’s reading.</p>
   <div class="install-line mono"><span class="prompt">$</span> npm install -g @shilpi1958/code-explainer</div>
   <div class="cta-row">
-    <a class="btn-primary mono" href="https://github.com/shilpi1958/pr-explainer">View on GitHub</a>
-    <a class="btn-secondary mono" href="https://github.com/shilpi1958/pr-explainer#readme">Read the docs</a>
+    <a class="btn-primary mono" href="#install">Get started</a>
+    <a class="btn-secondary mono" href="https://github.com/shilpi1958/pr-explainer">GitHub ↗</a>
+  </div>
+
+  <div class="hero-visual">
+    <div class="terminal">
+      <div class="terminal-bar"><span></span><span></span><span></span></div>
+      <div class="terminal-body mono">
+        <div><span class="prompt">$</span> code-explainer pr facebook/react#32</div>
+        <div class="ok">Generating explainer for PR #32…</div>
+        <div class="out">~/.code-explainer/explainers/01-react-responds-to-input-faster.md</div>
+        <div class="gap-sm"></div>
+        <div class="hd">React now responds to input changes faster</div>
+        <div class="out">Why it matters: live previews feel snappier; paste/voice aren’t missed.</div>
+        <div class="gap"></div>
+        <div><span class="prompt">$</span> code-explainer repo</div>
+        <div class="ok">Generating repo explainer for expressjs/express…</div>
+        <div class="out">~/.code-explainer/explainers/repos/01-expressjs-express.md</div>
+        <div class="gap-sm"></div>
+        <div class="hd">Express is the web framework that powers Node.js apps</div>
+        <div class="out">In short: handles requests, routing, and responses — the HTTP plumbing.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="modes">
+  <h2 class="eyebrow mono">TWO MODES</h2>
+  <p class="section-sub">Same profile. Same quiz habit. Different question.</p>
+  <div class="modes">
+    <div class="mode">
+      <p class="cmd mono">code-explainer pr &lt;PR&gt;</p>
+      <h3>What just shipped</h3>
+      <p>Point it at any merged pull request. Get what changed, why the team did it that way, and why it matters to you — without reading the diff.</p>
+    </div>
+    <div class="mode">
+      <p class="cmd mono">code-explainer repo</p>
+      <h3>What this codebase is</h3>
+      <p>Orient to a local checkout: what the product does, how it’s put together, what the team has been working on. Built for non-engineers and cross-domain engineers.</p>
+      <p class="note mono">Needs Graphify · uv tool install graphifyy</p>
+    </div>
   </div>
 </section>
 
 <section class="block">
   <div class="thesis">
     <p class="eyebrow mono">THE CODE IS THE TRUTH</p>
-    <p class="body">Docs go stale. Slack answers depend on who you ask. The code, right now, at this commit, is just true. The problem was never access — anyone can open a diff or a tree. It was translation. code-explainer reads what shipped (or what a repo is) and explains it in language pitched at whoever's asking.</p>
+    <p class="body">Docs rot. Slack depends on who you ask. The one thing that doesn’t go stale is the code itself — if someone can translate it.</p>
   </div>
 </section>
 
 <section class="block" id="how-it-works">
   <h2 class="eyebrow mono">HOW IT WORKS</h2>
-  <p class="section-sub">Init once. Then <code>pr</code> for a change, or <code>repo</code> for the whole codebase.</p>
+  <p class="section-sub">Init once. Then one command per PR — or per repo.</p>
   <div class="steps">
     <div class="step mono">
       <div class="num">01</div>
-      <div class="desc">Run <code>code-explainer init</code> once — edit <code>~/.code-explainer/learning-profile.md</code> with your role and what you're trying to understand.</div>
+      <div class="desc">Run <code>code-explainer init</code>. Describe your role and what you’re trying to understand in <code>~/.code-explainer/learning-profile.md</code>.</div>
     </div>
     <div class="step mono">
       <div class="num">02</div>
-      <div class="desc"><strong>PR mode:</strong> <code>code-explainer pr</code> against any merged PR — a number, URL, or <code>owner/repo#123</code>.</div>
+      <div class="desc">For a change: <code>code-explainer pr</code> with a number, URL, or <code>owner/repo#123</code>.</div>
     </div>
     <div class="step mono">
       <div class="num">03</div>
-      <div class="desc"><strong>Repo mode:</strong> <code>code-explainer repo</code> in a local checkout. Needs Graphify (<code>uv tool install graphifyy</code>) to map the code.</div>
+      <div class="desc">For a system: <code>cd</code> into a checkout, then <code>code-explainer repo</code> (install Graphify first).</div>
     </div>
     <div class="step mono">
       <div class="num">04</div>
-      <div class="desc">Summary prints in the terminal, file is saved, then a CHECK IT STUCK quiz — pick A/B/C, see ✓ correct.</div>
-    </div>
-  </div>
-
-  <div class="terminal">
-    <div class="terminal-bar"><span></span><span></span><span></span></div>
-    <div class="terminal-body mono">
-      <div><span class="prompt">$</span> code-explainer pr https://github.com/facebook/react/pull/32</div>
-      <div class="ok">Generating explainer for PR #32: Add new onInput event</div>
-      <div class="out">~/.code-explainer/explainers/01-react-now-responds-to-text-input-changes-faster-and-more-rel.md</div>
-      <div class="gap"></div>
-      <div class="hd">React now responds to input changes faster and more reliably</div>
-      <div class="out">Ships: The framework now supports the onInput event…</div>
-      <div class="gap-sm"></div>
-      <div class="eyebrow">What changed</div>
-      <div class="out">The team added onInput; examples switched from onKeyUp.</div>
-      <div class="eyebrow">Why it was done this way</div>
-      <div class="out">Faster updates + paste/voice coverage onKeyUp misses.</div>
-      <div class="eyebrow">Why it matters</div>
-      <div class="out">Live previews feel snappier; fewer paste-miss bugs.</div>
-      <div class="gap-sm"></div>
-      <div class="out">Press Enter for CHECK IT STUCK…</div>
-      <div class="gap"></div>
-      <div class="eyebrow">CHECK IT STUCK</div>
-      <div class="out">Quick check · a/b/c · Enter skip · q quit</div>
-      <div class="gap-sm"></div>
-      <div class="out">1 of 3</div>
-      <div class="hd">Why did the team choose onInput over onKeyUp?</div>
-      <div class="opt">  A) onKeyUp is deprecated in modern browsers</div>
-      <div class="correct">  B) onInput fires for paste/voice too — not just key release  ✓ correct</div>
-      <div class="opt">  C) onInput is required for React 19 concurrent mode</div>
-      <div class="gap-sm"></div>
-      <div class="footer-note">3 of 3 · generated from this PR's actual diff…</div>
-      <div class="out">Open explainer? [y/N]</div>
+      <div class="desc">Read the summary in your terminal. Optional CHECK IT STUCK quiz — A/B/C — so it sticks.</div>
     </div>
   </div>
 </section>
@@ -399,27 +451,27 @@
   <h2 class="eyebrow mono">WHO IT'S FOR</h2>
   <div class="cards">
     <div class="card">
-      <div class="tag mono">PM / ANALYST</div>
-      <h3>Understand PRs and unfamiliar repos</h3>
-      <p>Point it at a merged PR — or a whole checkout — and get a stakeholder-ready explanation without pinging anyone.</p>
+      <div class="tag mono">PRODUCT / OPS / SUPPORT</div>
+      <h3>Stop pinging engineers for translation</h3>
+      <p>Get stakeholder-ready briefs from real PRs and repos — in your language, not theirs.</p>
     </div>
     <div class="card">
-      <div class="tag mono">ENGINEER</div>
-      <h3>Orient outside your usual area</h3>
-      <p>Get the reasoning behind a change, or a map of a codebase you don't own, without reading every file.</p>
+      <div class="tag mono">ENGINEERS</div>
+      <h3>Orient outside your domain</h3>
+      <p>Review a teammate’s change, or land in an unfamiliar codebase, without spelunking every file.</p>
     </div>
     <div class="card">
-      <div class="tag mono">MAINTAINER</div>
-      <h3>Keep track of what shipped</h3>
-      <p>Including PRs an AI assistant pushed on your behalf — know exactly what changed and why.</p>
+      <div class="tag mono">MAINTAINERS</div>
+      <h3>Know what you (or the agent) shipped</h3>
+      <p>Especially when AI coding tools are pushing PRs — keep a plain-language record of why.</p>
     </div>
   </div>
 </section>
 
 <section class="block">
   <div class="narrow">
-    <h2 class="eyebrow mono" style="margin-bottom:14px">WHY NO API KEY</h2>
-    <p class="body">code-explainer shells out to the Claude Code CLI already on your machine — if you already use it, this is free to try immediately. No separate Anthropic Console API key, no signup for this tool. You do need Claude Code installed and logged in, plus the GitHub CLI (<code>gh</code>). Repo mode also needs Graphify (<code>uv tool install graphifyy</code>).</p>
+    <h2 class="eyebrow mono" style="margin-bottom:14px">NO SEPARATE API KEY</h2>
+    <p class="body">It shells out to Claude Code and the GitHub CLI you already use. Repo mode also needs Graphify for the knowledge graph. Nothing new to sign up for just to try a PR explainer.</p>
   </div>
 </section>
 
@@ -429,7 +481,7 @@
     <div><span class="comment"># install</span></div>
     <div>$ npm install -g @shilpi1958/code-explainer</div>
     <div class="gap"></div>
-    <div><span class="comment"># set up your profile once (applies everywhere)</span></div>
+    <div><span class="comment"># profile once (applies everywhere)</span></div>
     <div>$ code-explainer init</div>
     <div>$ # edit ~/.code-explainer/learning-profile.md</div>
     <div class="gap"></div>
@@ -437,14 +489,14 @@
     <div>$ code-explainer pr owner/repo#123</div>
     <div>$ code-explainer pr owner/repo#123 --no-quiz</div>
     <div class="gap"></div>
-    <div><span class="comment"># explain a whole local checkout (needs Graphify)</span></div>
+    <div><span class="comment"># explain a whole checkout</span></div>
     <div>$ uv tool install graphifyy</div>
     <div>$ code-explainer repo</div>
   </div>
 </section>
 
 <footer class="mono">
-  <span class="tagline">MIT licensed · self-hosted · uses your local Claude Code + gh auth</span>
+  <span class="tagline">MIT · self-hosted · Claude Code + gh · Graphify for repo mode</span>
   <div class="links">
     <a href="https://github.com/shilpi1958/pr-explainer">GitHub</a>
     <a href="https://www.npmjs.com/package/@shilpi1958/code-explainer">npm</a>

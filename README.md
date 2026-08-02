@@ -1,7 +1,7 @@
 # code-explainer
 
-Plain-language explainers for **merged GitHub PRs** or a **whole repository** —
-pitched at *you*, via a one-time learning profile. Optional interactive quiz
+Explain a PR or a whole repo in plain English — calibrated to whoever's
+reading, via a one-time learning profile. Plus an interactive CLI quiz
 so it sticks.
 
 ```bash

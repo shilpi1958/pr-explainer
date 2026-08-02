@@ -1,7 +1,7 @@
 {
   "name": "@shilpi1958/code-explainer",
   "version": "3.0.0",
-  "description": "Plain-language explainers for merged GitHub PRs or whole repos, pitched at your learning profile.",
+  "description": "Explain a PR or a whole repo in plain English — calibrated to whoever's reading, plus a CLI quiz.",
   "type": "module",
   "bin": {
     "code-explainer": "src/cli.js",

@@ -1,9 +1,9 @@
-name: "PR Explainer"
-description: "Generates a personalized explainer for a merged PR and commits it."
+name: "code-explainer"
+description: "Generates a personalized plain-English explainer for a merged PR and commits it."
 author: "shilpi1958"
 branding:
   icon: "book-open"
-  color: "purple"
+  color: "green"
 
 inputs:
   claude-code-oauth-token:
