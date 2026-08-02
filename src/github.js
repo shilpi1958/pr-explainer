@@ -78,3 +78,54 @@ export async function getPR(prRef) {
 export async function getPRDiff(prRef) {
   return gh(["pr", "diff", String(prRef)]);
 }
+
+/**
+ * Repo metadata for the GitHub remote of a local checkout (or cwd).
+ * Runs `gh` with cwd set so bare invocations resolve the right repo.
+ */
+export async function getRepoIdentity(repoRoot = process.cwd()) {
+  const json = await ghIn(repoRoot, [
+    "repo",
+    "view",
+    "--json",
+    "name,description,url,repositoryTopics,nameWithOwner,defaultBranchRef",
+  ]);
+  const data = JSON.parse(json);
+  const topics = Array.isArray(data.repositoryTopics)
+    ? data.repositoryTopics
+        .map((t) => (typeof t === "string" ? t : t?.name))
+        .filter(Boolean)
+    : [];
+  return {
+    name: data.name || null,
+    nameWithOwner: data.nameWithOwner || null,
+    description: data.description || null,
+    url: data.url || null,
+    topics,
+    defaultBranch: data.defaultBranchRef?.name || null,
+  };
+}
+
+/** Recent merged PRs for orientation — titles + bodies, not diffs. */
+export async function getRecentMergedPRs(repoRoot = process.cwd(), limit = 8) {
+  const json = await ghIn(repoRoot, [
+    "pr",
+    "list",
+    "--state",
+    "merged",
+    "--limit",
+    String(limit),
+    "--json",
+    "number,title,body,url,mergedAt",
+  ]);
+  return JSON.parse(json);
+}
+
+async function ghIn(cwd, args) {
+  try {
+    const { stdout } = await execFileAsync("gh", args, { cwd });
+    return stdout;
+  } catch (err) {
+    throw new Error(friendlyGhError(args, err));
+  }
+}

@@ -5,10 +5,11 @@ import path from "node:path";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
 import { getPR, getPRDiff } from "./github.js";
-import { buildPrompt } from "./prompt.js";
+import { buildPrompt, buildRepoPrompt } from "./prompt.js";
 import { runClaude } from "./claude.js";
 import { printExplainerSummary } from "./display.js";
 import { runInteractiveQuiz } from "./quiz.js";
+import { gatherRepoContext } from "./repo-context.js";
 
 const MAX_DIFF_CHARS = 60_000;
 const CONFIG_DIR = path.join(os.homedir(), ".pr-explainer");
@@ -27,28 +28,30 @@ const TEMPLATE_PATH = path.join(
 function usage() {
   console.error(
     `Usage: pr-explainer <PR> [--no-quiz]
+       pr-explainer repo [path] [--no-quiz]
        pr-explainer init [--force]
 
-Explains a merged pull request in plain language, tailored to your
-learning profile — however technical or non-technical you are, and
-whether or not you wrote the PR yourself. Ends with a multiple-choice
-Quick check so it's something you retain, not just read.
+Explains merged pull requests — or a whole repository — in plain language,
+tailored to your learning profile. Ends with a multiple-choice Quick check
+so it's something you retain, not just read.
 
-After the explainer is saved, a readable summary (title, Ships, What
-changed, Why it was done this way, Why it matters) prints to stderr.
+  PR     a PR number ("42"), a PR URL, or "owner/repo#42"
+         (a bare number resolves against the repo in your current directory)
+  repo   explain what a local git checkout does (cwd, or path to a checkout).
+         Uses Graphify to map the code, then writes a reader-pitched summary.
+  init   create ~/.pr-explainer/learning-profile.md from the template
+         (use --force to overwrite an existing profile)
+
+After the explainer is saved, a readable summary prints to stderr.
 In an interactive terminal: Press Enter, then CHECK IT STUCK quiz
 (a/b/c or 1/2/3, Enter to skip, q to quit), then optionally open the
 saved file. Pass --no-quiz to skip the quiz (also skipped in CI /
 non-TTY). Summary still prints unless PR_EXPLAINER_QUIET=1.
 
-  PR     a PR number ("42"), a PR URL, or "owner/repo#42"
-         (a bare number resolves against the repo in your current directory)
-  init   create ~/.pr-explainer/learning-profile.md from the template
-         (use --force to overwrite an existing profile)
-
-Requires the Claude Code CLI ("claude") installed and logged in
-(subscription or API key — whatever you already use for \`claude\`), and
-the GitHub CLI ("gh") authenticated.
+Requires:
+  - Claude Code CLI ("claude") installed and logged in
+  - GitHub CLI ("gh") authenticated
+  - For repo mode: Graphify CLI ("graphify") — uv tool install graphifyy
 
 Profile lookup (first hit wins):
   1. LEARNING_PROFILE env
@@ -144,6 +147,14 @@ function slugify(title) {
     .slice(0, 60);
 }
 
+function repoSlug(identity, repoRoot) {
+  const raw =
+    identity?.nameWithOwner ||
+    identity?.name ||
+    path.basename(repoRoot);
+  return slugify(String(raw).replace(/\//g, "-")) || "repo";
+}
+
 async function appendToIndex(outDir, { filename, title, pr }) {
   const indexPath = path.join(outDir, "index.md");
   if (!existsSync(indexPath)) {
@@ -160,25 +171,27 @@ async function appendToIndex(outDir, { filename, title, pr }) {
   await appendFile(indexPath, row, "utf8");
 }
 
-async function main() {
-  const { flags, positionals } = parseArgs(process.argv.slice(2));
-  const command = positionals[0];
-
-  if (flags.help || !command) {
-    usage();
-    process.exitCode = flags.help ? 0 : 1;
-    return;
+async function appendToRepoIndex(outDir, { filename, title, identity }) {
+  const indexPath = path.join(outDir, "index.md");
+  if (!existsSync(indexPath)) {
+    await writeFile(
+      indexPath,
+      "# Repo explainers\n\nRepositories explained so far, most recent first.\n\n" +
+        "| Date | Repo | Title | Entry |\n|---|---|---|---|\n",
+      "utf8"
+    );
   }
+  const date = new Date().toISOString().slice(0, 10);
+  const repoLabel = identity?.nameWithOwner || identity?.name || "repo";
+  const repoLink = identity?.url || "";
+  const repoCell = repoLink ? `[${repoLabel}](${repoLink})` : repoLabel;
+  const row = `| ${date} | ${repoCell} | ${title} | [${filename}](${filename}) |\n`;
+  await appendFile(indexPath, row, "utf8");
+}
 
-  if (command === "init") {
-    await initProfile(flags.force);
-    return;
-  }
-
-  const profile = await loadProfile();
-
-  const pr = await getPR(command);
-  let diff = await getPRDiff(command);
+async function explainPR(prRef, flags, profile) {
+  const pr = await getPR(prRef);
+  let diff = await getPRDiff(prRef);
   if (diff.length > MAX_DIFF_CHARS) {
     diff =
       diff.slice(0, MAX_DIFF_CHARS) +
@@ -205,6 +218,74 @@ async function main() {
 
   printExplainerSummary(entry);
   await runInteractiveQuiz(entry, flags, outPath);
+}
+
+async function explainRepo(repoPath, flags, profile) {
+  const root = path.resolve(repoPath || process.cwd());
+  if (!existsSync(root)) {
+    throw new Error(`Path not found: ${root}`);
+  }
+
+  console.error(`Gathering repo context for ${root}…`);
+  const ctx = await gatherRepoContext(root);
+  const label = ctx.identity?.nameWithOwner || ctx.identity?.name || path.basename(root);
+  console.error(`Generating repo explainer for ${label}…`);
+
+  const prompt = buildRepoPrompt({
+    profile,
+    identity: ctx.identity,
+    graphifyReport: ctx.report,
+    graphSummary: ctx.graphSummary,
+    recentPrs: ctx.recentPrs,
+  });
+  const entry = await runClaude(prompt);
+
+  const titleMatch = entry.match(/^#\s+(.+)$/m);
+  const title = titleMatch ? titleMatch[1] : label;
+
+  const baseDir = process.env.EXPLAINER_DIR || GLOBAL_EXPLAINERS;
+  const outDir = path.join(baseDir, "repos");
+  await mkdir(outDir, { recursive: true });
+  const num = nextEntryNumber(outDir);
+  const filename = `${num}-${repoSlug(ctx.identity, root)}.md`;
+  const outPath = path.join(outDir, filename);
+
+  await writeFile(outPath, entry + "\n", "utf8");
+  await appendToRepoIndex(outDir, {
+    filename,
+    title,
+    identity: ctx.identity,
+  });
+  console.log(outPath);
+
+  printExplainerSummary(entry);
+  await runInteractiveQuiz(entry, flags, outPath);
+}
+
+async function main() {
+  const { flags, positionals } = parseArgs(process.argv.slice(2));
+  const command = positionals[0];
+
+  if (flags.help || !command) {
+    usage();
+    process.exitCode = flags.help ? 0 : 1;
+    return;
+  }
+
+  if (command === "init") {
+    await initProfile(flags.force);
+    return;
+  }
+
+  const profile = await loadProfile();
+
+  if (command === "repo") {
+    const repoPath = positionals[1] || process.cwd();
+    await explainRepo(repoPath, flags, profile);
+    return;
+  }
+
+  await explainPR(command, flags, profile);
 }
 
 main().catch((err) => {
