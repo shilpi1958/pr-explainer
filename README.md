@@ -40,7 +40,30 @@ pr-explainer 42                                          # current repo only
 pr-explainer https://github.com/some-org/some-repo/pull/42   # any repo
 pr-explainer some-org/some-repo#42
 pr-explainer https://github.com/some-org/some-repo/pull/42 --no-quiz
+
+# Explain a whole local checkout (needs Graphify — see below)
+pr-explainer repo
+pr-explainer repo /path/to/checkout --no-quiz
 ```
+
+### Repo mode
+
+`pr-explainer repo` orients you to what a **repository** does — for non-engineers
+or engineers outside that domain — using the same learning profile as PR mode.
+
+It builds a local [Graphify](https://graphify.com/) knowledge graph of the
+checkout (structure, hubs, communities), combines that with recent merged PRs
+and your profile, and writes a concise plain-language explainer. Output lands
+in `~/.pr-explainer/explainers/repos/`.
+
+Requires a **local git checkout** with a GitHub remote (not a bare `owner/repo`
+URL yet), plus Graphify:
+
+```bash
+uv tool install graphifyy   # or: pipx install graphifyy
+```
+
+If `graphify` is missing, repo mode exits with install instructions.
 
 > **Note:** a bare number resolves against the GitHub repo of your current
 > directory. To explain a PR elsewhere, pass the full URL or `owner/repo#N`.
@@ -67,6 +90,8 @@ once to log in if you haven't.
 Also requires the [GitHub CLI](https://cli.github.com/) (`gh`), authenticated
 (`gh auth login`).
 
+**Repo mode** additionally requires [Graphify](https://graphify.com/docs)
+(`uv tool install graphifyy`).
 ## GitHub Action (optional)
 
 The CLI is the main way to use this — point it at any PR, any time. The
@@ -125,6 +150,13 @@ Profile lookup (first hit wins):
 | `EXPLAINER_DIR` | `~/.pr-explainer/explainers` | output directory |
 | `PR_EXPLAINER_NO_QUIZ` | unset | set to `1` to skip the interactive quiz |
 | `PR_EXPLAINER_QUIET` | unset | set to `1` to skip printing the summary to stderr |
+| `POSTHOG_API_KEY` | unset | enables product analytics + `$ai_generation` for [PostHog AI Evals](https://posthog.com/docs/ai-evals). Alias: `POSTHOG_PROJECT_TOKEN` |
+| `POSTHOG_HOST` | PostHog default | e.g. `https://us.i.posthog.com` |
+| `POSTHOG_DEBUG` | unset | set to `1` to log when PostHog is unconfigured |
+
+Copy [`.env.example`](.env.example) to `.env` for local runs (loaded automatically from cwd or package root). For the GitHub Action, pass `posthog-api-key` / `posthog-host` inputs (see `action.yml`) via repo secrets — not only a local `.env`.
+
+When configured, the CLI emits `profile_initialized`, `explainer_generation_started`, `explainer_generated`, plus `$ai_generation` (for evals) and mode-specific `pr_explained` / `repo_explained`.
 
 See [`templates/learning-profile.example.md`](templates/learning-profile.example.md)
 for the profile format.
@@ -147,6 +179,7 @@ machine except what `claude` itself sends.
 | Claude Code CLI not found | Install from https://claude.com/claude-code and run `claude` once to log in |
 | `gh` auth / forbidden errors | Run `gh auth login` |
 | GitHub CLI not found | Install from https://cli.github.com/ |
+| Graphify CLI not found / repo mode | Install with `uv tool install graphifyy`, then retry `pr-explainer repo` |
 
 Quick sanity checks:
 

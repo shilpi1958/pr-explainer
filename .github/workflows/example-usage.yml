@@ -20,3 +20,6 @@ jobs:
         with:
           # generate locally with: claude setup-token
           claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # optional — product analytics + AI evals
+          posthog-api-key: ${{ secrets.POSTHOG_API_KEY }}
+          posthog-host: ${{ secrets.POSTHOG_HOST }}

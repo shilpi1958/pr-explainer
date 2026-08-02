@@ -1,6 +1,7 @@
 import readline from "node:readline/promises";
 import { spawn } from "node:child_process";
 import { stdin as input, stdout as output, stderr } from "node:process";
+import { capture, getDeviceId } from "./posthog.js";
 
 const useColor = Boolean(stderr.isTTY);
 
@@ -156,9 +157,13 @@ export async function runInteractiveQuiz(markdown, flags = {}, outPath) {
   const n = items.length;
 
   let quitEarly = false;
+  let correctCount = 0;
 
   try {
     await rl.question(dim("Press Enter for CHECK IT STUCK… "));
+
+    const deviceId = await getDeviceId();
+    capture("quiz_started", deviceId, { question_count: n });
 
     stderr.write("\n");
     stderr.write(cyan(bold("CHECK IT STUCK")) + "\n");
@@ -209,6 +214,7 @@ export async function runInteractiveQuiz(markdown, flags = {}, outPath) {
         }
 
         if (choice === item.correctIndex) {
+          correctCount += 1;
           stderr.write(
             green(bold("✓ correct")) +
               `  ${letterOf(choice)}) ${item.options[choice]}\n`
@@ -256,6 +262,13 @@ export async function runInteractiveQuiz(markdown, flags = {}, outPath) {
       stderr.write("\n");
     }
 
+    const quizDeviceId = await getDeviceId();
+    capture("quiz_completed", quizDeviceId, {
+      question_count: n,
+      quit_early: quitEarly,
+      correct_count: correctCount,
+    });
+
     if (outPath) {
       const openAns = (
         await rl.question(dim("Open explainer? [y/N] "))
@@ -265,6 +278,8 @@ export async function runInteractiveQuiz(markdown, flags = {}, outPath) {
       if (openAns === "y" || openAns === "yes") {
         try {
           await openExplainer(outPath);
+          const openDeviceId = await getDeviceId();
+          capture("explainer_opened", openDeviceId, {});
         } catch (err) {
           stderr.write(
             `Could not open explainer: ${err.message}\n`

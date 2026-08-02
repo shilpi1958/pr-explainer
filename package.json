@@ -11,7 +11,9 @@
     "templates"
   ],
   "scripts": {
-    "start": "node src/cli.js"
+    "start": "node src/cli.js",
+    "check": "node --check src/cli.js && node --check src/posthog.js && node --check src/load-env.js && node --check src/quiz.js && node --check src/claude.js && node --check src/github.js && node --check src/prompt.js && node --check src/display.js && node --check src/graphify.js && node --check src/repo-context.js",
+    "test": "node --test test/**/*.test.js"
   },
   "keywords": [
     "github",
@@ -37,5 +39,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "posthog-node": "^5.47.3"
   }
 }

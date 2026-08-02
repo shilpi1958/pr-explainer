@@ -88,9 +88,9 @@ function writeSection(heading, body) {
 }
 
 /**
- * Print title, Ships, and the three core sections to stderr so the user
- * can read before the quiz. Skips Quick check (quiz covers it).
- * Honors PR_EXPLAINER_QUIET=1. Always prints (TTY or not) unless quiet.
+ * Print a readable summary to stderr before the quiz.
+ * Auto-detects PR vs repo explainer from headings.
+ * Honors PR_EXPLAINER_QUIET=1.
  */
 export function printExplainerSummary(markdown) {
   if (process.env.PR_EXPLAINER_QUIET === "1") return;
@@ -98,24 +98,45 @@ export function printExplainerSummary(markdown) {
 
   const titleMatch = markdown.match(/^#\s+(.+)$/m);
   const title = titleMatch ? stripMdLite(titleMatch[1]) : null;
-  const shipsMatch = markdown.match(/\*\*Ships:\*\*\s*(.+)/i);
-  const ships = shipsMatch ? stripMdLite(shipsMatch[1]) : null;
 
-  const what = extractSection(markdown, "What changed");
-  const whyWay = extractSection(markdown, "Why it was done this way");
-  const whyMatters = extractSection(markdown, "Why it matters");
+  const isRepo =
+    /##\s+What it does\b/i.test(markdown) ||
+    /\*\*In short:\*\*/i.test(markdown);
 
   stderr.write("\n");
   if (title) {
     stderr.write(bold(title) + "\n");
   }
-  if (ships) {
-    stderr.write(dim("Ships: ") + ships + "\n");
-  }
 
-  writeSection("What changed", what);
-  writeSection("Why it was done this way", whyWay);
-  writeSection("Why it matters", whyMatters);
+  if (isRepo) {
+    const inShortMatch = markdown.match(/\*\*In short:\*\*\s*(.+)/i);
+    const inShort = inShortMatch ? stripMdLite(inShortMatch[1]) : null;
+    if (inShort) {
+      stderr.write(dim("In short: ") + inShort + "\n");
+    }
+    writeSection("What it does", extractSection(markdown, "What it does"));
+    writeSection(
+      "How it's put together",
+      extractSection(markdown, "How it's put together")
+    );
+    writeSection(
+      "What the team has been working on",
+      extractSection(markdown, "What the team has been working on")
+    );
+    writeSection("Why it matters", extractSection(markdown, "Why it matters"));
+  } else {
+    const shipsMatch = markdown.match(/\*\*Ships:\*\*\s*(.+)/i);
+    const ships = shipsMatch ? stripMdLite(shipsMatch[1]) : null;
+    if (ships) {
+      stderr.write(dim("Ships: ") + ships + "\n");
+    }
+    writeSection("What changed", extractSection(markdown, "What changed"));
+    writeSection(
+      "Why it was done this way",
+      extractSection(markdown, "Why it was done this way")
+    );
+    writeSection("Why it matters", extractSection(markdown, "Why it matters"));
+  }
 
   const quizSection = extractSection(markdown, "Quick check");
   if (quizSection) {
