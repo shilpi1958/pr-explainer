@@ -1,9 +1,10 @@
 {
-  "name": "@shilpi1958/pr-explainer",
-  "version": "0.2.4",
-  "description": "Point it at any merged PR and get a plain explainer of what it did and why, pitched at you.",
+  "name": "@shilpi1958/code-explainer",
+  "version": "3.0.0",
+  "description": "Plain-language explainers for merged GitHub PRs or whole repos, pitched at your learning profile.",
   "type": "module",
   "bin": {
+    "code-explainer": "src/cli.js",
     "pr-explainer": "src/cli.js"
   },
   "files": [
@@ -19,10 +20,12 @@
     "github",
     "pull-request",
     "pr",
+    "repo",
     "explainer",
     "claude",
     "cli",
-    "documentation"
+    "documentation",
+    "code-explainer"
   ],
   "author": "shilpi1958",
   "repository": {

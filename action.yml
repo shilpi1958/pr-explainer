@@ -45,10 +45,10 @@ runs:
       with:
         node-version: "20"
 
-    - name: Install pr-explainer and Claude Code CLI
+    - name: Install code-explainer and Claude Code CLI
       shell: bash
       run: |
-        npm install --no-save @shilpi1958/pr-explainer @anthropic-ai/claude-code
+        npm install --no-save @shilpi1958/code-explainer @anthropic-ai/claude-code
 
     - name: Generate explainer
       id: generate
@@ -62,14 +62,14 @@ runs:
         POSTHOG_API_KEY: ${{ inputs.posthog-api-key }}
         POSTHOG_HOST: ${{ inputs.posthog-host }}
       run: |
-        OUT_PATH=$(npx pr-explainer "${{ github.event.pull_request.number }}")
+        OUT_PATH=$(npx code-explainer pr "${{ github.event.pull_request.number }}")
         echo "path=$OUT_PATH" >> "$GITHUB_OUTPUT"
 
     - name: Commit entry
       if: ${{ inputs.commit == 'true' }}
       shell: bash
       run: |
-        git config user.name "pr-explainer[bot]"
+        git config user.name "code-explainer[bot]"
         git config user.email "actions@github.com"
         git add "${{ steps.generate.outputs.path }}" "$(dirname "${{ steps.generate.outputs.path }}")/index.md"
         git commit -m "docs: explainer for #${{ github.event.pull_request.number }}"

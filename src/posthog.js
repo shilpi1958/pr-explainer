@@ -1,8 +1,8 @@
 /**
- * PostHog analytics client for pr-explainer.
+ * PostHog analytics client for code-explainer.
  *
- * Uses a persistent anonymous device ID stored in ~/.pr-explainer/device-id
- * so returning users are tracked across sessions without collecting any PII.
+ * Uses a persistent anonymous device ID under ~/.code-explainer (or legacy
+ * ~/.pr-explainer) so returning users are tracked without collecting PII.
  * All captures are guarded behind POSTHOG_API_KEY or POSTHOG_PROJECT_TOKEN.
  */
 import { PostHog } from "posthog-node";
@@ -15,7 +15,19 @@ import { loadEnvFiles } from "./load-env.js";
 
 loadEnvFiles();
 
-const CONFIG_DIR = path.join(os.homedir(), ".pr-explainer");
+const CONFIG_CANDIDATES = [
+  path.join(os.homedir(), ".code-explainer"),
+  path.join(os.homedir(), ".pr-explainer"),
+];
+
+function resolveConfigDir() {
+  for (const dir of CONFIG_CANDIDATES) {
+    if (existsSync(dir)) return dir;
+  }
+  return CONFIG_CANDIDATES[0];
+}
+
+const CONFIG_DIR = resolveConfigDir();
 const DEVICE_ID_FILE = path.join(CONFIG_DIR, "device-id");
 const AI_TEXT_BUDGET = 80_000;
 
