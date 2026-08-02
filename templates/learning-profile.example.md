@@ -1,10 +1,11 @@
 <!--
-  Created by `pr-explainer init` at ~/.pr-explainer/learning-profile.md.
+  Created by `code-explainer init` at ~/.code-explainer/learning-profile.md
+  (legacy installs may still use ~/.pr-explainer/).
   Edit that file once — it applies everywhere you run the CLI.
   (A ./learning-profile.md in a repo overrides the global one if present.)
 
-  This describes YOU, the reader — not whoever wrote the PR. You don't
-  need to have written the code, or even be technical, to use this tool.
+  This describes YOU, the reader — not whoever wrote the PR or the repo.
+  You don't need to have written the code, or even be technical, to use this tool.
 
   Describe your role and what you're trying to understand better — it's
   easier to answer accurately than trying to list what you do/don't know,

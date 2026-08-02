@@ -13,9 +13,9 @@ import { gatherRepoContext } from "./repo-context.js";
 import { capture, captureAiGeneration, getDeviceId, shutdown } from "./posthog.js";
 
 const MAX_DIFF_CHARS = 60_000;
-const CONFIG_DIR = path.join(os.homedir(), ".pr-explainer");
-const GLOBAL_PROFILE = path.join(CONFIG_DIR, "learning-profile.md");
-const GLOBAL_EXPLAINERS = path.join(CONFIG_DIR, "explainers");
+const HOME = os.homedir();
+const NEW_CONFIG_DIR = path.join(HOME, ".code-explainer");
+const LEGACY_CONFIG_DIR = path.join(HOME, ".pr-explainer");
 const LOCAL_PROFILE = "learning-profile.md";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -26,44 +26,66 @@ const TEMPLATE_PATH = path.join(
   "learning-profile.example.md"
 );
 
+const invokedAs = path.basename(process.argv[1] || "code-explainer").replace(
+  /\.(js|mjs|cjs)$/i,
+  ""
+);
+const CLI_NAME =
+  invokedAs === "pr-explainer" || invokedAs === "code-explainer"
+    ? invokedAs
+    : "code-explainer";
+const isLegacyBin = CLI_NAME === "pr-explainer";
+
+function resolveConfigDir() {
+  if (existsSync(NEW_CONFIG_DIR)) return NEW_CONFIG_DIR;
+  if (existsSync(LEGACY_CONFIG_DIR)) return LEGACY_CONFIG_DIR;
+  return NEW_CONFIG_DIR;
+}
+
+function configPaths() {
+  const configDir = resolveConfigDir();
+  return {
+    configDir,
+    globalProfile: path.join(configDir, "learning-profile.md"),
+    globalExplainers: path.join(configDir, "explainers"),
+  };
+}
+
 function usage() {
   console.error(
-    `Usage: pr-explainer <PR> [--no-quiz]
-       pr-explainer repo [path] [--no-quiz]
-       pr-explainer init [--force]
+    `Usage: ${CLI_NAME} init [--force]
+       ${CLI_NAME} pr <PR> [--no-quiz]
+       ${CLI_NAME} repo [path] [--no-quiz]
+${
+  isLegacyBin
+    ? `       ${CLI_NAME} <PR> [--no-quiz]          (legacy shorthand for pr)\n`
+    : ""
+}
+Explain merged pull requests — or a whole repository — in plain language,
+tailored to your learning profile. Ends with a multiple-choice Quick check.
 
-Explains merged pull requests — or a whole repository — in plain language,
-tailored to your learning profile. Ends with a multiple-choice Quick check
-so it's something you retain, not just read.
-
-  PR     a PR number ("42"), a PR URL, or "owner/repo#42"
+  init   create ~/.code-explainer/learning-profile.md from the template
+         (falls back to ~/.pr-explainer/ if you already have one)
+  pr     explain a merged PR: number ("42"), URL, or "owner/repo#42"
          (a bare number resolves against the repo in your current directory)
-  repo   explain what a local git checkout does (cwd, or path to a checkout).
-         Uses Graphify to map the code, then writes a reader-pitched summary.
-  init   create ~/.pr-explainer/learning-profile.md from the template
-         (use --force to overwrite an existing profile)
-
-After the explainer is saved, a readable summary prints to stderr.
-In an interactive terminal: Press Enter, then CHECK IT STUCK quiz
-(a/b/c or 1/2/3, Enter to skip, q to quit), then optionally open the
-saved file. Pass --no-quiz to skip the quiz (also skipped in CI /
-non-TTY). Summary still prints unless PR_EXPLAINER_QUIET=1.
+  repo   explain what a local git checkout does (default: current directory).
+         Requires Graphify:  uv tool install graphifyy
 
 Requires:
   - Claude Code CLI ("claude") installed and logged in
   - GitHub CLI ("gh") authenticated
-  - For repo mode: Graphify CLI ("graphify") — uv tool install graphifyy
-
-Profile lookup (first hit wins):
-  1. LEARNING_PROFILE env
-  2. ./learning-profile.md (repo override)
-  3. ~/.pr-explainer/learning-profile.md (default)
+  - For repo mode: Graphify CLI ("graphify")
 
 Env:
   LEARNING_PROFILE      optional path to profile file
-  EXPLAINER_DIR         optional output dir (default: ~/.pr-explainer/explainers)
+  EXPLAINER_DIR         optional output dir
   PR_EXPLAINER_NO_QUIZ  set to 1 to skip the interactive quiz
   PR_EXPLAINER_QUIET    set to 1 to skip printing the summary to stderr
+
+Install:
+  npm install -g @shilpi1958/code-explainer
+  # repo mode also needs:
+  uv tool install graphifyy
 `
   );
 }
@@ -76,16 +98,25 @@ function parseArgs(argv) {
     else if (arg === "--no-quiz") flags.noQuiz = true;
     else if (arg === "--force") flags.force = true;
     else if (arg.startsWith("-")) {
-      throw new Error(`Unknown flag: ${arg}\nRun pr-explainer --help for usage.`);
+      throw new Error(`Unknown flag: ${arg}\nRun ${CLI_NAME} --help for usage.`);
     } else positionals.push(arg);
   }
   return { flags, positionals };
 }
 
+function looksLikePrRef(arg) {
+  if (!arg) return false;
+  if (/^\d+$/.test(arg)) return true;
+  if (/^https?:\/\//i.test(arg)) return true;
+  if (/^[^/\s]+\/[^#\s]+#\d+$/.test(arg)) return true;
+  return false;
+}
+
 function resolveProfilePath() {
+  const { globalProfile } = configPaths();
   if (process.env.LEARNING_PROFILE) return process.env.LEARNING_PROFILE;
   if (existsSync(LOCAL_PROFILE)) return path.resolve(LOCAL_PROFILE);
-  return GLOBAL_PROFILE;
+  return globalProfile;
 }
 
 async function loadProfile() {
@@ -94,12 +125,13 @@ async function loadProfile() {
     if (process.env.LEARNING_PROFILE) {
       throw new Error(
         `No profile found at LEARNING_PROFILE=${profilePath}.\n` +
-          `Fix that path, or unset LEARNING_PROFILE and run \`pr-explainer init\`.`
+          `Fix that path, or unset LEARNING_PROFILE and run \`${CLI_NAME} init\`.`
       );
     }
+    const { globalProfile } = configPaths();
     throw new Error(
-      `No profile found. Run \`pr-explainer init\`, then edit ` +
-        `${GLOBAL_PROFILE} to describe yourself.`
+      `No profile found. Run \`${CLI_NAME} init\`, then edit ` +
+        `${globalProfile} to describe yourself.`
     );
   }
   const profile = await readFile(profilePath, "utf8");
@@ -116,19 +148,27 @@ async function initProfile(force = false) {
   if (!existsSync(TEMPLATE_PATH)) {
     throw new Error(`Template not found at ${TEMPLATE_PATH}`);
   }
-  await mkdir(CONFIG_DIR, { recursive: true });
-  if (existsSync(GLOBAL_PROFILE) && !force) {
+  // Prefer creating under the new config dir going forward
+  const configDir = existsSync(LEGACY_CONFIG_DIR) && !existsSync(NEW_CONFIG_DIR) && !force
+    ? LEGACY_CONFIG_DIR
+    : NEW_CONFIG_DIR;
+  const globalProfile = path.join(configDir, "learning-profile.md");
+
+  await mkdir(configDir, { recursive: true });
+  if (existsSync(globalProfile) && !force) {
     console.error(
-      `Profile already exists at ${GLOBAL_PROFILE}\n` +
+      `Profile already exists at ${globalProfile}\n` +
         `Edit it in place, or re-run with --force to overwrite from the template.`
     );
     const deviceId = await getDeviceId();
     capture("profile_initialized", deviceId, { force: false, created: false });
     return;
   }
-  await copyFile(TEMPLATE_PATH, GLOBAL_PROFILE);
-  console.error(`Created ${GLOBAL_PROFILE}`);
-  console.error("Edit that file to describe your role, then run pr-explainer <PR>.");
+  await copyFile(TEMPLATE_PATH, globalProfile);
+  console.error(`Created ${globalProfile}`);
+  console.error(
+    `Edit that file to describe your role, then run \`${CLI_NAME} pr <PR>\` or \`${CLI_NAME} repo\`.`
+  );
   const deviceId = await getDeviceId();
   capture("profile_initialized", deviceId, { force, created: true });
 }
@@ -158,6 +198,10 @@ function repoSlug(identity, repoRoot) {
     identity?.name ||
     path.basename(repoRoot);
   return slugify(String(raw).replace(/\//g, "-")) || "repo";
+}
+
+function defaultExplainerDir() {
+  return process.env.EXPLAINER_DIR || configPaths().globalExplainers;
 }
 
 async function appendToIndex(outDir, { filename, title, pr }) {
@@ -235,7 +279,7 @@ async function explainPR(prRef, flags, profile) {
   const titleMatch = entry.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1] : pr.title;
 
-  const outDir = process.env.EXPLAINER_DIR || GLOBAL_EXPLAINERS;
+  const outDir = defaultExplainerDir();
   await mkdir(outDir, { recursive: true });
   const num = nextEntryNumber(outDir);
   const filename = `${num}-${slugify(title)}.md`;
@@ -318,8 +362,7 @@ async function explainRepo(repoPath, flags, profile) {
   const titleMatch = entry.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1] : label;
 
-  const baseDir = process.env.EXPLAINER_DIR || GLOBAL_EXPLAINERS;
-  const outDir = path.join(baseDir, "repos");
+  const outDir = path.join(defaultExplainerDir(), "repos");
   await mkdir(outDir, { recursive: true });
   const num = nextEntryNumber(outDir);
   const filename = `${num}-${repoSlug(ctx.identity, root)}.md`;
@@ -381,7 +424,35 @@ async function main() {
     return;
   }
 
-  await explainPR(command, flags, profile);
+  if (command === "pr") {
+    const prRef = positionals[1];
+    if (!prRef) {
+      console.error(`Missing PR reference.\nRun ${CLI_NAME} --help for usage.`);
+      process.exitCode = 1;
+      return;
+    }
+    await explainPR(prRef, flags, profile);
+    return;
+  }
+
+  // Legacy: `pr-explainer <PR>` without the `pr` subcommand
+  if (isLegacyBin && looksLikePrRef(command)) {
+    await explainPR(command, flags, profile);
+    return;
+  }
+
+  // Helpful nudge for the new UX
+  if (looksLikePrRef(command)) {
+    throw new Error(
+      `Pass the PR after the \`pr\` subcommand:\n` +
+        `  ${CLI_NAME} pr ${command}\n\n` +
+        `Or run \`${CLI_NAME} --help\`.`
+    );
+  }
+
+  throw new Error(
+    `Unknown command: ${command}\nRun ${CLI_NAME} --help for usage.`
+  );
 }
 
 main()

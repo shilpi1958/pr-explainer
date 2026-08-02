@@ -20,8 +20,8 @@ function friendlyGhError(args, err) {
       `No pull request found for that reference.\n` +
       `A bare number (e.g. \`42\`) only looks in the repo of your current directory.\n` +
       `From anywhere, pass a URL or \`owner/repo#42\`:\n` +
-      `  pr-explainer https://github.com/owner/repo/pull/42\n` +
-      `  pr-explainer owner/repo#42\n\n` +
+      `  code-explainer pr https://github.com/owner/repo/pull/42\n` +
+      `  code-explainer pr owner/repo#42\n\n` +
       `(${cmd})\n${detail}`
     );
   }
@@ -68,7 +68,7 @@ export async function getPR(prRef) {
   if (!pr.mergedAt) {
     throw new Error(
       `PR ${prRef} is not merged yet.\n` +
-        `pr-explainer only explains merged PRs (past changes that actually shipped).\n` +
+        `code-explainer pr only explains merged PRs (past changes that actually shipped).\n` +
         `Pick a merged PR, or wait until this one lands.`
     );
   }

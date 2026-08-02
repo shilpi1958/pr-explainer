@@ -135,5 +135,7 @@ describe("cli event name contract (static)", async () => {
     assert.match(cliSrc, /capture\("explainer_generated"/);
     assert.match(cliSrc, /captureAiGeneration\(/);
     assert.match(cliSrc, /await shutdown\(\)/);
+    assert.match(cliSrc, /command === "pr"/);
+    assert.match(cliSrc, /command === "repo"/);
   });
 });
