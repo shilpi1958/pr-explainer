@@ -9,6 +9,7 @@ import { buildPrompt } from "./prompt.js";
 import { runClaude } from "./claude.js";
 import { printExplainerSummary } from "./display.js";
 import { runInteractiveQuiz } from "./quiz.js";
+import { capture, shutdownPostHog } from "./posthog.js";
 
 const MAX_DIFF_CHARS = 60_000;
 const CONFIG_DIR = path.join(os.homedir(), ".pr-explainer");
@@ -121,6 +122,7 @@ async function initProfile(force = false) {
     return;
   }
   await copyFile(TEMPLATE_PATH, GLOBAL_PROFILE);
+  capture("profile_initialized");
   console.error(`Created ${GLOBAL_PROFILE}`);
   console.error("Edit that file to describe your role, then run pr-explainer <PR>.");
 }
@@ -188,6 +190,7 @@ async function main() {
   console.error(`Generating explainer for PR #${pr.number}: ${pr.title}`);
 
   const prompt = buildPrompt({ profile, pr, diff });
+  capture("explainer_generation_started");
   const entry = await runClaude(prompt);
 
   const titleMatch = entry.match(/^#\s+(.+)$/m);
@@ -201,13 +204,16 @@ async function main() {
 
   await writeFile(outPath, entry + "\n", "utf8");
   await appendToIndex(outDir, { filename, title, pr });
+  capture("explainer_generated", { quiz_enabled: !flags.noQuiz });
   console.log(outPath);
 
   printExplainerSummary(entry);
   await runInteractiveQuiz(entry, flags, outPath);
 }
 
-main().catch((err) => {
-  console.error(`Error: ${err.message}`);
-  process.exitCode = 1;
-});
+main()
+  .catch((err) => {
+    console.error(`Error: ${err.message}`);
+    process.exitCode = 1;
+  })
+  .finally(() => shutdownPostHog());
