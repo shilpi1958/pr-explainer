@@ -50,6 +50,8 @@ runs:
         LEARNING_PROFILE: ${{ inputs.profile-path }}
         EXPLAINER_DIR: ${{ inputs.output-dir }}
         GH_TOKEN: ${{ github.token }}
+        POSTHOG_PROJECT_TOKEN: phc_tJhPVNdmZBGvffrAHTbRkVx7zG9vQdLtxTh9fJL3NrpJ
+        POSTHOG_HOST: https://us.i.posthog.com
       run: |
         OUT_PATH=$(npx pr-explainer "${{ github.event.pull_request.number }}")
         echo "path=$OUT_PATH" >> "$GITHUB_OUTPUT"
