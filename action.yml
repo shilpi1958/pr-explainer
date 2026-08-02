@@ -15,6 +15,15 @@ inputs:
   anthropic-api-key:
     description: "Anthropic Console API key. Used only if claude-code-oauth-token is not set."
     required: false
+  posthog-api-key:
+    description: >
+      PostHog project API key (POSTHOG_API_KEY). Enables product analytics and
+      $ai_generation capture for AI Evals. Optional — CLI works without it.
+    required: false
+  posthog-host:
+    description: "PostHog host, e.g. https://us.i.posthog.com"
+    required: false
+    default: "https://us.i.posthog.com"
   profile-path:
     description: "Path to the learning profile file"
     required: false
@@ -50,6 +59,8 @@ runs:
         LEARNING_PROFILE: ${{ inputs.profile-path }}
         EXPLAINER_DIR: ${{ inputs.output-dir }}
         GH_TOKEN: ${{ github.token }}
+        POSTHOG_API_KEY: ${{ inputs.posthog-api-key }}
+        POSTHOG_HOST: ${{ inputs.posthog-host }}
       run: |
         OUT_PATH=$(npx pr-explainer "${{ github.event.pull_request.number }}")
         echo "path=$OUT_PATH" >> "$GITHUB_OUTPUT"

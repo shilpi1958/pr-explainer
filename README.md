@@ -150,6 +150,13 @@ Profile lookup (first hit wins):
 | `EXPLAINER_DIR` | `~/.pr-explainer/explainers` | output directory |
 | `PR_EXPLAINER_NO_QUIZ` | unset | set to `1` to skip the interactive quiz |
 | `PR_EXPLAINER_QUIET` | unset | set to `1` to skip printing the summary to stderr |
+| `POSTHOG_API_KEY` | unset | enables product analytics + `$ai_generation` for [PostHog AI Evals](https://posthog.com/docs/ai-evals). Alias: `POSTHOG_PROJECT_TOKEN` |
+| `POSTHOG_HOST` | PostHog default | e.g. `https://us.i.posthog.com` |
+| `POSTHOG_DEBUG` | unset | set to `1` to log when PostHog is unconfigured |
+
+Copy [`.env.example`](.env.example) to `.env` for local runs (loaded automatically from cwd or package root). For the GitHub Action, pass `posthog-api-key` / `posthog-host` inputs (see `action.yml`) via repo secrets — not only a local `.env`.
+
+When configured, the CLI emits `profile_initialized`, `explainer_generation_started`, `explainer_generated`, plus `$ai_generation` (for evals) and mode-specific `pr_explained` / `repo_explained`.
 
 See [`templates/learning-profile.example.md`](templates/learning-profile.example.md)
 for the profile format.

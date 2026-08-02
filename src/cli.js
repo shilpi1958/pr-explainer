@@ -10,6 +10,7 @@ import { runClaude } from "./claude.js";
 import { printExplainerSummary } from "./display.js";
 import { runInteractiveQuiz } from "./quiz.js";
 import { gatherRepoContext } from "./repo-context.js";
+import { capture, captureAiGeneration, getDeviceId, shutdown } from "./posthog.js";
 
 const MAX_DIFF_CHARS = 60_000;
 const CONFIG_DIR = path.join(os.homedir(), ".pr-explainer");
@@ -121,11 +122,15 @@ async function initProfile(force = false) {
       `Profile already exists at ${GLOBAL_PROFILE}\n` +
         `Edit it in place, or re-run with --force to overwrite from the template.`
     );
+    const deviceId = await getDeviceId();
+    capture("profile_initialized", deviceId, { force: false, created: false });
     return;
   }
   await copyFile(TEMPLATE_PATH, GLOBAL_PROFILE);
   console.error(`Created ${GLOBAL_PROFILE}`);
   console.error("Edit that file to describe your role, then run pr-explainer <PR>.");
+  const deviceId = await getDeviceId();
+  capture("profile_initialized", deviceId, { force, created: true });
 }
 
 function nextEntryNumber(dir) {
@@ -201,7 +206,31 @@ async function explainPR(prRef, flags, profile) {
   console.error(`Generating explainer for PR #${pr.number}: ${pr.title}`);
 
   const prompt = buildPrompt({ profile, pr, diff });
-  const entry = await runClaude(prompt);
+  const deviceId = await getDeviceId();
+  capture("explainer_generation_started", deviceId, {
+    mode: "pr",
+    pr_number: pr.number,
+    diff_truncated: diff.length >= MAX_DIFF_CHARS,
+  });
+  const started = Date.now();
+  let entry;
+  try {
+    entry = await runClaude(prompt);
+  } catch (err) {
+    captureAiGeneration(deviceId, {
+      prompt,
+      output: "",
+      latencySec: (Date.now() - started) / 1000,
+      mode: "pr",
+      error: err.message,
+      properties: {
+        pr_number: pr.number,
+        diff_truncated: diff.length >= MAX_DIFF_CHARS,
+      },
+    });
+    throw err;
+  }
+  const latencySec = (Date.now() - started) / 1000;
 
   const titleMatch = entry.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1] : pr.title;
@@ -215,6 +244,30 @@ async function explainPR(prRef, flags, profile) {
   await writeFile(outPath, entry + "\n", "utf8");
   await appendToIndex(outDir, { filename, title, pr });
   console.log(outPath);
+
+  captureAiGeneration(deviceId, {
+    prompt,
+    output: entry,
+    latencySec,
+    mode: "pr",
+    properties: {
+      pr_number: pr.number,
+      diff_truncated: diff.length >= MAX_DIFF_CHARS,
+    },
+  });
+  capture("explainer_generated", deviceId, {
+    mode: "pr",
+    pr_number: pr.number,
+    quiz_enabled: !flags.noQuiz,
+    diff_truncated: diff.length >= MAX_DIFF_CHARS,
+    latency_sec: latencySec,
+  });
+  capture("pr_explained", deviceId, {
+    pr_number: pr.number,
+    quiz_enabled: !flags.noQuiz,
+    diff_truncated: diff.length >= MAX_DIFF_CHARS,
+    latency_sec: latencySec,
+  });
 
   printExplainerSummary(entry);
   await runInteractiveQuiz(entry, flags, outPath);
@@ -238,7 +291,29 @@ async function explainRepo(repoPath, flags, profile) {
     graphSummary: ctx.graphSummary,
     recentPrs: ctx.recentPrs,
   });
-  const entry = await runClaude(prompt);
+  const deviceId = await getDeviceId();
+  capture("explainer_generation_started", deviceId, {
+    mode: "repo",
+    repo_name: ctx.identity?.nameWithOwner ?? ctx.identity?.name ?? null,
+  });
+  const started = Date.now();
+  let entry;
+  try {
+    entry = await runClaude(prompt);
+  } catch (err) {
+    captureAiGeneration(deviceId, {
+      prompt,
+      output: "",
+      latencySec: (Date.now() - started) / 1000,
+      mode: "repo",
+      error: err.message,
+      properties: {
+        repo_name: ctx.identity?.nameWithOwner ?? ctx.identity?.name ?? null,
+      },
+    });
+    throw err;
+  }
+  const latencySec = (Date.now() - started) / 1000;
 
   const titleMatch = entry.match(/^#\s+(.+)$/m);
   const title = titleMatch ? titleMatch[1] : label;
@@ -257,6 +332,27 @@ async function explainRepo(repoPath, flags, profile) {
     identity: ctx.identity,
   });
   console.log(outPath);
+
+  captureAiGeneration(deviceId, {
+    prompt,
+    output: entry,
+    latencySec,
+    mode: "repo",
+    properties: {
+      repo_name: ctx.identity?.nameWithOwner ?? ctx.identity?.name ?? null,
+    },
+  });
+  capture("explainer_generated", deviceId, {
+    mode: "repo",
+    repo_name: ctx.identity?.nameWithOwner ?? ctx.identity?.name ?? null,
+    quiz_enabled: !flags.noQuiz,
+    latency_sec: latencySec,
+  });
+  capture("repo_explained", deviceId, {
+    repo_name: ctx.identity?.nameWithOwner ?? ctx.identity?.name ?? null,
+    quiz_enabled: !flags.noQuiz,
+    latency_sec: latencySec,
+  });
 
   printExplainerSummary(entry);
   await runInteractiveQuiz(entry, flags, outPath);
@@ -288,7 +384,17 @@ async function main() {
   await explainPR(command, flags, profile);
 }
 
-main().catch((err) => {
-  console.error(`Error: ${err.message}`);
-  process.exitCode = 1;
-});
+main()
+  .catch(async (err) => {
+    try {
+      const deviceId = await getDeviceId();
+      capture("cli_error", deviceId, { error_type: err.constructor?.name ?? "Error" });
+    } catch {
+      // analytics failure must not alter exit behavior
+    }
+    console.error(`Error: ${err.message}`);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
+    await shutdown();
+  });
